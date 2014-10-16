@@ -22,9 +22,6 @@
 #import "NSMutableDictionary+MulleSingleOrMultiValueObjects.h"
 
 
-#define PEDANTIC   0
-
-
 @implementation NSMutableDictionary (MulleSingleOrMultiValueObjects)
 
 static Class  nsArrayClass;

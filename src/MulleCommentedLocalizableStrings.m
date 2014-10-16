@@ -32,6 +32,7 @@
 {
    [_keyValues release];
    [_keyComments release];
+   [_lastComment release];
 
    [super dealloc];
 }

@@ -93,13 +93,6 @@ static inline void   parser_memorize( parser *p, parser_memo *memo)
 }
 
 
-static inline void   parser_recall( parser *p, parser_memo *memo)
-{
-   p->curr       = memo->curr;
-   p->lineNumber = memo->lineNumber;
-}
-
-
 static inline NSString   *parser_get_string( parser *p)
 {
    return( [parser_get_retained_string( p) autorelease]);

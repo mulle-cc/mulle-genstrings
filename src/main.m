@@ -31,7 +31,7 @@ static void   usage()
            "\n"
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
            "\n"
-           "\tsource : any kind of text file, probably a .m file\n");
+           "\tsources : any kind of text files, probably .m files\n");
    _exit( 1);
 }
 
@@ -142,7 +142,6 @@ int main( int argc, const char * argv[])
             
             [collection retain];
          }
-         
       
          if( ! strings)
          {

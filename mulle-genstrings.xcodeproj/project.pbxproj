@@ -1,0 +1,243 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		41106EA919EF3070000CC2B6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41106EA819EF3070000CC2B6 /* Foundation.framework */; };
+		41106EAC19EF3070000CC2B6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 41106EAB19EF3070000CC2B6 /* main.m */; };
+		4141F06519F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m in Sources */ = {isa = PBXBuildFile; fileRef = 4141F06419F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m */; };
+		4141F06819F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 4141F06719F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m */; };
+		415F7B9519EFD6D000A7562A /* MulleCommentedLocalizableStrings.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9419EFD6D000A7562A /* MulleCommentedLocalizableStrings.m */; };
+		415F7B9819EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9719EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m */; };
+		415F7B9A19EFF69000A7562A /* parser.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9919EFF69000A7562A /* parser.m */; };
+		415F7BA119F0544800A7562A /* NSString+MulleQuotedString.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		41106EA519EF3070000CC2B6 /* mulle-genstrings */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "mulle-genstrings"; sourceTree = BUILT_PRODUCTS_DIR; };
+		41106EA819EF3070000CC2B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		41106EAB19EF3070000CC2B6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4141F06219F0782B0041FC63 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		4141F06319F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleCaseInsensitiveCompare.h"; sourceTree = "<group>"; };
+		4141F06419F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleCaseInsensitiveCompare.m"; sourceTree = "<group>"; };
+		4141F06619F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+MulleSingleOrMultiValueObjects.h"; sourceTree = "<group>"; };
+		4141F06719F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+MulleSingleOrMultiValueObjects.m"; sourceTree = "<group>"; };
+		415F7B9319EFD6D000A7562A /* MulleCommentedLocalizableStrings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MulleCommentedLocalizableStrings.h; sourceTree = "<group>"; };
+		415F7B9419EFD6D000A7562A /* MulleCommentedLocalizableStrings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MulleCommentedLocalizableStrings.m; sourceTree = "<group>"; };
+		415F7B9619EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleEnumerateNSLocalizedStringParameters.h"; sourceTree = "<group>"; };
+		415F7B9719EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleEnumerateNSLocalizedStringParameters.m"; sourceTree = "<group>"; };
+		415F7B9919EFF69000A7562A /* parser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = parser.m; sourceTree = "<group>"; };
+		415F7B9B19EFF6E900A7562A /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		415F7B9F19F0544800A7562A /* NSString+MulleQuotedString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleQuotedString.h"; sourceTree = "<group>"; };
+		415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleQuotedString.m"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		41106EA219EF3070000CC2B6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41106EA919EF3070000CC2B6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		41106E9C19EF3070000CC2B6 = {
+			isa = PBXGroup;
+			children = (
+				4141F06219F0782B0041FC63 /* README.md */,
+				41106EAA19EF3070000CC2B6 /* src */,
+				41106EA719EF3070000CC2B6 /* Frameworks */,
+				41106EA619EF3070000CC2B6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		41106EA619EF3070000CC2B6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				41106EA519EF3070000CC2B6 /* mulle-genstrings */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		41106EA719EF3070000CC2B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41106EA819EF3070000CC2B6 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		41106EAA19EF3070000CC2B6 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				41106EAB19EF3070000CC2B6 /* main.m */,
+				4141F06619F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.h */,
+				4141F06719F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m */,
+				4141F06319F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.h */,
+				4141F06419F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m */,
+				415F7B9619EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.h */,
+				415F7B9719EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m */,
+				415F7B9F19F0544800A7562A /* NSString+MulleQuotedString.h */,
+				415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */,
+				415F7B9319EFD6D000A7562A /* MulleCommentedLocalizableStrings.h */,
+				415F7B9419EFD6D000A7562A /* MulleCommentedLocalizableStrings.m */,
+				415F7B9B19EFF6E900A7562A /* parser.h */,
+				415F7B9919EFF69000A7562A /* parser.m */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		41106EA419EF3070000CC2B6 /* mulle-genstrings */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 41106EB319EF3070000CC2B6 /* Build configuration list for PBXNativeTarget "mulle-genstrings" */;
+			buildPhases = (
+				41106EA119EF3070000CC2B6 /* Sources */,
+				41106EA219EF3070000CC2B6 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "mulle-genstrings";
+			productName = "mulle-genstrings";
+			productReference = 41106EA519EF3070000CC2B6 /* mulle-genstrings */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		41106E9D19EF3070000CC2B6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Mulle kybernetiK";
+			};
+			buildConfigurationList = 41106EA019EF3070000CC2B6 /* Build configuration list for PBXProject "mulle-genstrings" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 41106E9C19EF3070000CC2B6;
+			productRefGroup = 41106EA619EF3070000CC2B6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				41106EA419EF3070000CC2B6 /* mulle-genstrings */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		41106EA119EF3070000CC2B6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				415F7BA119F0544800A7562A /* NSString+MulleQuotedString.m in Sources */,
+				4141F06519F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m in Sources */,
+				415F7B9519EFD6D000A7562A /* MulleCommentedLocalizableStrings.m in Sources */,
+				415F7B9819EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m in Sources */,
+				415F7B9A19EFF69000A7562A /* parser.m in Sources */,
+				41106EAC19EF3070000CC2B6 /* main.m in Sources */,
+				4141F06819F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		41106EB119EF3070000CC2B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				ONLY_ACTIVE_ARCH = YES;
+			};
+			name = Debug;
+		};
+		41106EB219EF3070000CC2B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+			};
+			name = Release;
+		};
+		41106EB419EF3070000CC2B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_POINTER_SIGNEDNESS = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUN_CLANG_STATIC_ANALYZER = YES;
+			};
+			name = Debug;
+		};
+		41106EB519EF3070000CC2B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_POINTER_SIGNEDNESS = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUN_CLANG_STATIC_ANALYZER = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		41106EA019EF3070000CC2B6 /* Build configuration list for PBXProject "mulle-genstrings" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41106EB119EF3070000CC2B6 /* Debug */,
+				41106EB219EF3070000CC2B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		41106EB319EF3070000CC2B6 /* Build configuration list for PBXNativeTarget "mulle-genstrings" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41106EB419EF3070000CC2B6 /* Debug */,
+				41106EB519EF3070000CC2B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 41106E9D19EF3070000CC2B6 /* Project object */;
+}

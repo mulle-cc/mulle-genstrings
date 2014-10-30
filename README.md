@@ -11,11 +11,11 @@ In my tests, the files created by <b><tt>mulle-genstrings</tt></b> are identical
 
 ## Usage
 
-Assuming your projects is english and you wrote:
+Assuming your project is in english and you wrote:
 
 	NSLocalizedString( @"foo", @"this is foo as a verb");
 
-You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english Localizable.strings and  `mulle-genstrings -a -o de.lproj *.m` other language projects
+You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english <tt>Localizable.strings</tt> and `mulle-genstrings -a -o de.lproj *.m` for other language projects.
 
 
 ## Author

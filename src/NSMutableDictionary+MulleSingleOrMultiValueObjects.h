@@ -23,7 +23,7 @@
 
 // stripped down 4 mulle-genstrings
 
-@interface NSMutableDictionary (MulleSingleOrMultiValueObjects)
+@interface NSMutableDictionary( MulleSingleOrMultiValueObjects)
 
 - (void) mulleAddObject:(id) obj
                  forKey:(id <NSCopying>) key;

@@ -121,6 +121,7 @@
    }
 }
 
+
 - (void) parserErrorInFileName:(NSString *) fileName
                     lineNumber:(NSUInteger) lineNumber
                         reason:(NSString *) reason
@@ -128,7 +129,6 @@
    [NSException raise:NSInvalidArgumentException
                format:@"%@", reason];
 }
-
 
 
 - (id) init
@@ -176,6 +176,7 @@
 - (BOOL) mergeKey:(NSString *) key
             value:(NSString *) value
           comment:(NSString *) comment
+          addOnly:(BOOL) addOnly
 {
    NSString       *oldValue;
    NSArray        *comments;
@@ -192,9 +193,12 @@
    
    if( ! [oldValue isEqualToString:value])
    {
-      [_keyValues setObject:value
-                     forKey:key];
-      chchchchchanges = YES;
+      if( ! addOnly || ! oldValue)
+      {
+         [_keyValues setObject:value
+                        forKey:key];
+         chchchchchanges = YES;
+      }
    }
    
    comment  = [comment stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -221,6 +225,7 @@
 
 
 - (BOOL) mergeParameters:(NSArray *) parameters
+                  addOnly:(BOOL) addOnly
 {
    NSString       *key;
    NSString       *value;
@@ -232,11 +237,13 @@
    
    return( [self mergeKey:key
                     value:value
-                  comment:comment]);
+                  comment:comment
+                  addOnly:addOnly]);
 }
 
 
 - (BOOL) mergeParametersArray:(NSArray *) collection
+                      addOnly:(BOOL) addOnly
 {
    NSEnumerator   *rover;
    NSArray        *parameters;
@@ -249,7 +256,8 @@
    {
       @autoreleasepool
       {
-         chchchchchanges |= [self mergeParameters:parameters];
+         chchchchchanges |= [self mergeParameters:parameters
+                                          addOnly:addOnly];
       }
    }
    return( chchchchchanges);

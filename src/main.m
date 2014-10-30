@@ -27,8 +27,9 @@
 
 static void   usage()
 {
-   fprintf( stderr, "mulle-genstrings [-o <outputDir>] <sources>\n"
+   fprintf( stderr, "mulle-genstrings [-a][-o <outputDir>] <sources>\n"
            "\n"
+           "\t-a addOnly   : don't overwrite key, if it already exists\n"
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
            "\n"
            "\tsources : any kind of text files, probably .m files\n");
@@ -106,9 +107,11 @@ int main( int argc, const char * argv[])
    NSArray                            *collection;
    NSString                           *outputFile;
    NSString                           *inputFile;
-   BOOL                               chchchchchanges;
+   BOOL                               chchchanges;
+   BOOL                               addOnly;
    int                                i;
    
+   addOnly = NO;
    @autoreleasepool
    {
       if( argc <= 2)
@@ -116,10 +119,16 @@ int main( int argc, const char * argv[])
    
       outputFile      = nil;
       strings         = nil;
-      chchchchchanges = YES;
+      chchchanges = YES;
       
       for( i = 1; i < argc; i++)
       {
+         if( ! strcmp( argv[ i], "-a"))
+         {
+            addOnly = YES;
+            continue;
+         }
+         
          if( ! strcmp( argv[ i], "-o"))
          {
             if( outputFile || ++i >= argc)
@@ -128,7 +137,7 @@ int main( int argc, const char * argv[])
             outputFile = [NSString stringWithCString:argv[ i]];
             outputFile = [outputFile stringByAppendingPathComponent:@"Localizable.strings"];
 
-            chchchchchanges = NO;  // do change tracking
+            chchchanges = NO;  // do change tracking
             continue;
          }
       
@@ -148,18 +157,26 @@ int main( int argc, const char * argv[])
             /* now merge key/value/comment collection with previous contents */
             strings = [[[MulleCommentedLocalizableStrings alloc] initWithContentsOfFile:outputFile] autorelease];
             if( ! strings)
+            {
+               if( [[NSFileManager defaultManager] fileExistsAtPath:outputFile])
+               {
+                  NSLog( @"can't parse %@", outputFile);
+                  exit( 1);
+               }
                strings = [[MulleCommentedLocalizableStrings new] autorelease];
+            }
          }
       
          @autoreleasepool
          {
-            chchchchchanges |= [strings mergeParametersArray:collection];
+            chchchanges |= [strings mergeParametersArray:collection
+                                                 addOnly:addOnly];
             [collection autorelease];
          }
       }
    
       /* changed something ? then update */
-      if( chchchchchanges)
+      if( chchchanges)
          return( writeLocalizableStrings( strings, outputFile));
    }
    

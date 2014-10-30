@@ -26,11 +26,12 @@
 
 @property( retain, nonatomic) NSMutableDictionary  *keyValues;
 @property( retain, nonatomic) NSMutableDictionary  *keyComments;
-@property( copy, nonatomic) NSString  *lastComment;
+@property( copy, nonatomic)   NSString             *lastComment;
 
 - (id) initWithContentsOfFile:(NSString *) file;
 - (NSString *) localizableStringsDescription;
 
-- (BOOL) mergeParametersArray:(NSArray *) collection;
+- (BOOL) mergeParametersArray:(NSArray *) collection
+                      addOnly:(BOOL) addOnly;
 
 @end

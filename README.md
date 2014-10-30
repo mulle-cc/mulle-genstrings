@@ -9,6 +9,14 @@ all, it can only deal with <tt>NSLocalizedString</tt>.
 
 In my tests, the files created by <b><tt>mulle-genstrings</tt></b> are identical to the files created with <b><tt>genstrings</tt></b>.
 
+## Usage
+
+Assuming your projects is english and you wrote:
+
+	NSLocalizedString( @"foo", @"this is foo as a verb");
+
+You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english Localizable.strings and  `mulle-genstrings -a -o de.lproj *.m` other language projects
+
 
 ## Author
 

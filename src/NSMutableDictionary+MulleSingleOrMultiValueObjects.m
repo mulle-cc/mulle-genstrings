@@ -22,7 +22,7 @@
 #import "NSMutableDictionary+MulleSingleOrMultiValueObjects.h"
 
 
-@implementation NSMutableDictionary (MulleSingleOrMultiValueObjects)
+@implementation NSMutableDictionary( MulleSingleOrMultiValueObjects)
 
 static Class  nsArrayClass;
 

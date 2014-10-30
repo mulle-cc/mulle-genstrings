@@ -9,7 +9,7 @@
 #import "NSString+MulleCaseInsensitiveCompare.h"
 
 
-@implementation NSString (MulleCaseInsensitiveCompare)
+@implementation NSString( MulleCaseInsensitiveCompare)
 
 - (NSComparisonResult) mulleCaseInsensitiveCompare:(NSString *) other
 {

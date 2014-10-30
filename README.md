@@ -2,7 +2,7 @@
 
 This is like a version of Apple's <b><tt>genstrings</tt></b> first dumbed down and then put on steroids. With it's added muscle it is able to merge changes with the <tt>Localizable.strings</tt> file. 
 
-The dumbing down, means that it has no options except -o. It always reads UTF8 files and it always writes UTF16 files. Dumbest of
+The dumbing down, means that it has only two options -a and -o. It always reads UTF8 files and it always writes UTF16 files. Dumbest of
 all, it can only deal with <tt>NSLocalizedString</tt>.
 
 <b><tt>mulle-genstrings</tt></b> tries not to "fix" <b><tt>genstrings</tt></b> behaviour too much, except when the output would be clearly broken.

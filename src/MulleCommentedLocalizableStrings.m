@@ -56,6 +56,7 @@
 {
    NSString   *key;
    NSString   *value;
+   NSString   *comment;
    
    key = parser_do_string( p);
    
@@ -78,7 +79,8 @@
    
    if( _lastComment)
    {
-      [_keyComments setObject:_lastComment
+      comment = [_lastComment stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+      [_keyComments setObject:comment
                        forKey:key];
 
       [_lastComment autorelease];
@@ -208,7 +210,7 @@
       if( comment)
       {
          [_keyComments mulleAddObject:comment
-                              forKey:key];
+                               forKey:key];
          return( YES);
       }
       return( chchchchchanges);

@@ -31,6 +31,7 @@ static void   usage()
            "\n"
            "\t-a addOnly   : don't overwrite key, if it already exists\n"
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
+           "\t-v version   : print version\n"
            "\n"
            "\tsources : any kind of text files, probably .m files\n");
    _exit( 1);
@@ -123,6 +124,12 @@ int main( int argc, const char * argv[])
       
       for( i = 1; i < argc; i++)
       {
+         if( ! strcmp( argv[ i], "-a"))
+         {
+            fprintf( stderr, "mulle-genstrings v1848.1\n");
+            continue;
+         }
+
          if( ! strcmp( argv[ i], "-a"))
          {
             addOnly = YES;

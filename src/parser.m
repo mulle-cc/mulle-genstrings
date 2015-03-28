@@ -342,7 +342,7 @@ void   parser_do_token_character( parser *p, unichar expect)
    parser_skip_whitespace( p);
    c = parser_next_character( p);
    if( c != expect)
-      parser_error( p, "'%C' expected", expect);
+      parser_error( p, "a '%C' character was expected", expect);
 }
 
 
@@ -448,7 +448,7 @@ NSString  *parser_do_string( parser *p)
    
    parser_skip_peeked_character( p, '\"');   // skip '"'
    if( ! parser_grab_text_until_quote( p))
-      parser_error( p, "a closing '\"' was expected");
+      parser_error( p, "a closing double quote '\"' was expected");
 
    s = parser_get_string( p);
    parser_skip_peeked_character( p, '\"');   // skip '"'

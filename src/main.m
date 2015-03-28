@@ -124,7 +124,7 @@ int main( int argc, const char * argv[])
       
       for( i = 1; i < argc; i++)
       {
-         if( ! strcmp( argv[ i], "-a"))
+         if( ! strcmp( argv[ i], "-v"))
          {
             fprintf( stderr, "mulle-genstrings v1848.1\n");
             continue;

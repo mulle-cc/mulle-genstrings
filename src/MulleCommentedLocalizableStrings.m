@@ -57,6 +57,7 @@
    NSString   *key;
    NSString   *value;
    NSString   *comment;
+   NSCharacterSet  *whitespace;
    
    key = parser_do_string( p);
    
@@ -77,15 +78,39 @@
    [_keyValues setObject:value
                   forKey:key];
    
-   if( _lastComment)
+   if( ! _lastComment)
+      return;
+   
+   whitespace = [NSCharacterSet whitespaceCharacterSet];
+   comment    = [_lastComment stringByTrimmingCharactersInSet:whitespace];
+   
+   if( ! getenv("mulle-genstrings-dont-split-comment-lines"))
    {
-      comment = [_lastComment stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-      [_keyComments setObject:comment
-                       forKey:key];
-
-      [_lastComment autorelease];
-      _lastComment = nil;
+      NSArray         *components;
+      NSEnumerator    *rover;
+      NSString        *s;
+      NSMutableArray  *array;
+      
+      components = [_lastComment componentsSeparatedByString:@"\n"];
+      if( [components count] != 1)
+      {
+         rover = [components objectEnumerator];
+         array = [NSMutableArray array];
+         
+         while( s = [rover nextObject])
+         {
+            s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            if( ! [array containsObject:s])
+               [array addObject:s];
+         }
+         comment = [array componentsJoinedByString:@"\n"];
+      }
    }
+   
+   [_keyComments setObject:comment
+                    forKey:key];
+   [_lastComment autorelease];
+   _lastComment = nil;
 }
 
 
@@ -128,8 +153,8 @@
                     lineNumber:(NSUInteger) lineNumber
                         reason:(NSString *) reason
 {
-   [NSException raise:NSInvalidArgumentException
-               format:@"%@", reason];
+   fprintf( stderr, "error in %s line %d: %s\n", [fileName fileSystemRepresentation], (int) lineNumber, [reason UTF8String]);
+   exit( 1);
 }
 
 

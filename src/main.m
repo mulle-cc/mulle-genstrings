@@ -33,32 +33,63 @@ static void   usage()
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
            "\t-v version   : print version\n"
            "\n"
-           "\tsources : any kind of text files, probably .m files\n");
+           "\tsources      : any kind of text files, probably .m files\n");
    _exit( 1);
+}
+
+
+static NSStringEncoding   encodings[] =
+{
+   NSUTF8StringEncoding,
+   NSNonLossyASCIIStringEncoding,
+   NSMacOSRomanStringEncoding,
+   NSISOLatin1StringEncoding,
+   NSNEXTSTEPStringEncoding,
+   NSUTF16LittleEndianStringEncoding,
+   NSUTF16BigEndianStringEncoding,
+   NSUTF32StringEncoding,
+   0
+};
+
+
+static NSString   *valiantlyOpenFile( NSString *file)
+{
+   NSError      *error;
+   NSData       *data;
+   NSString     *s;
+   NSUInteger   i;
+   
+   s    = nil;
+   data = [NSData dataWithContentsOfFile:file
+                                 options:0
+                                   error:&error];
+   if( data)
+      for( i = 0; encodings[ i]; i++)
+      {
+         s = [[[NSString alloc] initWithData:data
+                                    encoding:encodings[ i]] autorelease];
+         if( s)
+            return( s);
+      }
+   
+   fprintf( stderr, "Failed to read \"%s\": %s\n",
+           [file fileSystemRepresentation],
+           data ? [[error description] UTF8String] : "unknown encoding");
+   exit( 1);
 }
 
 
 static NSArray  *parameterCollectionFromFile( NSString *file)
 {
-   NSString         *input;
-   NSEnumerator     *rover;
-   NSArray          *parameters;
-   NSMutableArray   *collection;
-   NSError          *error;
+   NSString           *input;
+   NSEnumerator       *rover;
+   NSArray            *parameters;
+   NSMutableArray     *collection;
    
    collection = [NSMutableArray array];
    @autoreleasepool
    {
-      input = [NSString stringWithContentsOfFile:file
-                                        encoding:NSUTF8StringEncoding
-                                           error:&error];
-      if( ! input)
-      {
-         fprintf( stderr, "Failed to read \"%s\": %s\n",
-              [file fileSystemRepresentation],
-              [[error description] cString]);
-         exit( 1);
-      }
+      input = valiantlyOpenFile( file);
       
       if( ! [input rangeOfString:@"NSLocalizedString"].length)
          return( nil);  // nothing to do
@@ -126,7 +157,7 @@ int main( int argc, const char * argv[])
       {
          if( ! strcmp( argv[ i], "-v"))
          {
-            fprintf( stderr, "mulle-genstrings v1848.1\n");
+            fprintf( stderr, "mulle-genstrings v18.48.2\n");
             continue;
          }
 

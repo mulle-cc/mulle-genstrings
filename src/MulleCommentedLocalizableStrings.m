@@ -20,6 +20,7 @@
 //
 #import "MulleCommentedLocalizableStrings.h"
 
+#import "NSTask+System.h"
 #import "NSString+MulleQuotedString.h"
 #import "NSString+MulleCaseInsensitiveCompare.h"
 #import "NSMutableDictionary+MulleSingleOrMultiValueObjects.h"
@@ -189,7 +190,7 @@
    }
    
    data = [s dataUsingEncoding:NSUTF16StringEncoding];
-   parser_init( &p, [data bytes], [data length] / sizeof( unichar));
+   parser_init( &p, (void *) [data bytes], [data length] / sizeof( unichar));
    parser_set_filename( &p, file);
    parser_set_error_callback( &p, self, @selector( parserErrorInFileName:lineNumber:reason:));
    
@@ -291,6 +292,29 @@
 }
 
 
+- (NSString *) translatedValue:(NSString *) value
+{
+   NSString   *s;
+   NSString   *t;
+
+   if( ! _translatorScript)
+      return( value);
+   
+   s = [_translatorScript stringByReplacingOccurrencesOfString:@"{}"
+                                                    withString:value];
+   
+   t = [NSTask systemWithString:s
+               workingDirectory:nil];
+   if( ! t)
+   {
+      NSLog( @"failed to execute translation script \"%@\"", s);
+      exit( 1);
+   }
+
+   return( [t length] ? t : s);
+}
+
+
 - (NSString *) localizableStringsDescription
 {
    NSArray           *keys;
@@ -323,10 +347,11 @@
          [buf appendString:@" */\n"];
       }
       
-      value = [_keyValues objectForKey:key];
-      
       [buf appendString:[key mulleQuotedString]];
       [buf appendString:@" = "];
+      
+      value = [_keyValues objectForKey:key];
+      value = [self translatedValue:value];
       [buf appendString:[value mulleQuotedString]];
       [buf appendString:@";\n"];
       [buf appendString:@"\n"];

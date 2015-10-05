@@ -32,6 +32,8 @@ static void   usage()
            "\t-a addOnly   : don't overwrite key, if it already exists\n"
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
            "\t-v version   : print version\n"
+           "\t-s key       : replace key to search (default is NSLocalizedString)\n"
+           "\t-t script    : translation script to use for value (given as {})\n"
            "\n"
            "\tsources      : any kind of text files, probably .m files\n");
    _exit( 1);
@@ -63,14 +65,21 @@ static NSString   *valiantlyOpenFile( NSString *file)
    data = [NSData dataWithContentsOfFile:file
                                  options:0
                                    error:&error];
-   if( data)
-      for( i = 0; encodings[ i]; i++)
-      {
-         s = [[[NSString alloc] initWithData:data
-                                    encoding:encodings[ i]] autorelease];
-         if( s)
-            return( s);
-      }
+   if( ! data)
+   {
+      fprintf( stderr, "Failed to open \"%s\": %s\n",
+           [file fileSystemRepresentation],
+           [[error localizedFailureReason] fileSystemRepresentation]);
+      exit( 1);
+   }
+   
+   for( i = 0; encodings[ i]; i++)
+   {
+      s = [[[NSString alloc] initWithData:data
+                                 encoding:encodings[ i]] autorelease];
+      if( s)
+         return( s);
+   }
    
    fprintf( stderr, "Failed to read \"%s\": %s\n",
            [file fileSystemRepresentation],
@@ -79,7 +88,7 @@ static NSString   *valiantlyOpenFile( NSString *file)
 }
 
 
-static NSArray  *parameterCollectionFromFile( NSString *file)
+static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
 {
    NSString           *input;
    NSEnumerator       *rover;
@@ -91,17 +100,22 @@ static NSArray  *parameterCollectionFromFile( NSString *file)
    {
       input = valiantlyOpenFile( file);
       
-      if( ! [input rangeOfString:@"NSLocalizedString"].length)
+      if( ! [input rangeOfString:key].length)
          return( nil);  // nothing to do
       
       /* read NSLocalizedString parameters from input */
-      rover = [input mulleEnumerateNSLocalizedStringParameters];
+      rover = [input mulleEnumerateNSLocalizedStringParameters:key];
       while( parameters = [rover nextObject])
       {
          NSCParameterAssert( [parameters count] == 3);
+         // can happen with malformed text
+         if( [parameters objectAtIndex:0] == [NSNull null] ||
+             [parameters objectAtIndex:1] == [NSNull null] ||
+             [parameters objectAtIndex:2] == [NSNull null])
+            continue;
+            
          [collection addObject:parameters];
       }
-      
    }
    return( collection);
 }
@@ -139,14 +153,19 @@ int main( int argc, const char * argv[])
    NSArray                            *collection;
    NSString                           *outputFile;
    NSString                           *inputFile;
+   NSString                           *translator;
+   NSString                           *NSLocalizedStringKey;
    BOOL                               chchchanges;
    BOOL                               addOnly;
    int                                i;
    
+   NSLocalizedStringKey = @"NSLocalizedString";
+   translator           = nil;
+   
    addOnly = NO;
    @autoreleasepool
    {
-      if( argc <= 2)
+      if( argc < 2)
          usage();
    
       outputFile      = nil;
@@ -157,13 +176,31 @@ int main( int argc, const char * argv[])
       {
          if( ! strcmp( argv[ i], "-v"))
          {
-            fprintf( stderr, "mulle-genstrings v18.48.2\n");
+            fprintf( stderr, "mulle-genstrings v18.48.3\n");
             continue;
          }
 
          if( ! strcmp( argv[ i], "-a"))
          {
             addOnly = YES;
+            continue;
+         }
+
+         if( ! strcmp( argv[ i], "-s"))
+         {
+            if( i == argc-1)
+               exit( 1);
+
+            NSLocalizedStringKey = [[[NSString alloc] initWithCString:argv[ ++i]] autorelease];
+            continue;
+         }
+         
+         if( ! strcmp( argv[ i], "-t"))
+         {
+            if( i == argc-1)
+               exit( 1);
+
+            translator = [[[NSString alloc] initWithCString:argv[ ++i]] autorelease];
             continue;
          }
          
@@ -182,10 +219,9 @@ int main( int argc, const char * argv[])
          @autoreleasepool
          {
             inputFile = [NSString stringWithCString:argv[ i]];
-            collection = parameterCollectionFromFile( inputFile);
-            if( ! collection)
+            collection = parameterCollectionFromFile( inputFile, NSLocalizedStringKey);
+            if( ! [collection count])
                continue;
-            NSCParameterAssert( [collection count]);
             
             [collection retain];
          }
@@ -203,6 +239,7 @@ int main( int argc, const char * argv[])
                }
                strings = [[MulleCommentedLocalizableStrings new] autorelease];
             }
+            [strings setTranslatorScript:translator];
          }
       
          @autoreleasepool

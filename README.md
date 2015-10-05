@@ -24,6 +24,17 @@ You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english
 <tt>Localizable.strings</tt> and `mulle-genstrings -a -o de.lproj *.m` for other 
 language projects.
 
+### -m Option, change search key
+
+You can change the term to search for instead of NSLocalizedString. Useful if
+you follow the suggestions from [\"Localizing library code, the right way ?\"](http://www.mulle-kybernetik.com/weblog/2015/localizing_library_code_the_r.html}.
+
+### -t Option, translate key
+
+You can push each value through a translate script, that you specify with the
+-t option. Every occurence of {} will be replaced with the value to translate.
+The scripe should echo the translated value.
+
 
 ## Author
 

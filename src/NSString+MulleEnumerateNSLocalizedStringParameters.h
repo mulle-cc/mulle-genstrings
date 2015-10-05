@@ -24,6 +24,6 @@
 
 @interface NSString ( MulleEnumerateNSLocalizedStringParameters)
 
-- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters;
+- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key;
 
 @end

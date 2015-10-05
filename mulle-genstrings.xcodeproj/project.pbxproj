@@ -15,6 +15,7 @@
 		415F7B9819EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9719EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m */; };
 		415F7B9A19EFF69000A7562A /* parser.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9919EFF69000A7562A /* parser.m */; };
 		415F7BA119F0544800A7562A /* NSString+MulleQuotedString.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */; };
+		41F4076D1BC2D14F00359BA7 /* NSTask+System.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F4076C1BC2D14F00359BA7 /* NSTask+System.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,8 @@
 		415F7B9B19EFF6E900A7562A /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		415F7B9F19F0544800A7562A /* NSString+MulleQuotedString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleQuotedString.h"; sourceTree = "<group>"; };
 		415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleQuotedString.m"; sourceTree = "<group>"; };
+		41F4076B1BC2D14F00359BA7 /* NSTask+System.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTask+System.h"; sourceTree = "<group>"; };
+		41F4076C1BC2D14F00359BA7 /* NSTask+System.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSTask+System.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +93,8 @@
 				415F7B9419EFD6D000A7562A /* MulleCommentedLocalizableStrings.m */,
 				415F7B9B19EFF6E900A7562A /* parser.h */,
 				415F7B9919EFF69000A7562A /* parser.m */,
+				41F4076B1BC2D14F00359BA7 /* NSTask+System.h */,
+				41F4076C1BC2D14F00359BA7 /* NSTask+System.m */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -150,6 +155,7 @@
 				415F7B9819EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m in Sources */,
 				415F7B9A19EFF69000A7562A /* parser.m in Sources */,
 				41106EAC19EF3070000CC2B6 /* main.m in Sources */,
+				41F4076D1BC2D14F00359BA7 /* NSTask+System.m in Sources */,
 				4141F06819F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

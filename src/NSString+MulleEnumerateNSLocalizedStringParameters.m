@@ -163,6 +163,7 @@ NS_ENDHANDLER
    NSRange      _range;
    NSData       *_data;
    NSData       *_searchData;
+   NSUInteger   _searchLen;
 }
 @end
 
@@ -179,15 +180,18 @@ NS_ENDHANDLER
 
 
 - (id) initWithString:(NSString *) s
+            searchKey:(NSString *) key
 {
    if( self = [super init])
    {
+      _searchLen = [key length];
+
       _length = [s length];
       _range  = NSMakeRange( 1, _length - 1);  // skip leading 0xFEFF
       _data   = [[s dataUsingEncoding:NSUTF16StringEncoding] retain];
       
-      _searchData = [@"NSLocalizedString" dataUsingEncoding:NSUTF16StringEncoding];
-      _searchData = [[_searchData subdataWithRange:NSMakeRange( 1 * sizeof( unichar), 17 * sizeof( unichar))] retain];
+      _searchData = [key dataUsingEncoding:NSUTF16StringEncoding];
+      _searchData = [[_searchData subdataWithRange:NSMakeRange( 1 * sizeof( unichar), _searchLen * sizeof( unichar))] retain];
    }
    return( self);
 }
@@ -223,9 +227,9 @@ NS_ENDHANDLER
    
    if( ! parameters)
    {
-      NSParameterAssert( _range.length >= 17);
-      _range.location += 17;  //
-      _range.length  -= 17;
+      NSParameterAssert( _range.length >= _searchLen);
+      _range.location += _searchLen;  //
+      _range.length   -= _searchLen ;
       return( [self nextObject]);  // try again
    }
    
@@ -241,9 +245,10 @@ NS_ENDHANDLER
 
 @implementation NSString ( MulleEnumerateNSLocalizedStringParameters)
 
-- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters
+- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key
 {
-   return( [[[MulleNSLocalizedStringEnumerator alloc] initWithString:self] autorelease]);
+   return( [[[MulleNSLocalizedStringEnumerator alloc] initWithString:self
+                                                           searchKey:key] autorelease]);
 }
 
 @end

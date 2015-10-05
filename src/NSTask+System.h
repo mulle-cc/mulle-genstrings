@@ -1,9 +1,7 @@
 //
-//  MulleCommentedStringsFileParser.h
-//  mulle-genstrings
+//  NSTask+System.h
 //
-//  Created by Nat! on 16/10/14.
-//  Copyright (c) 2014 Mulle kybernetiK. All rights reserved.
+//  Copyright (c) 2011 Mulle kybernetiK. All rights reserved.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -22,17 +20,11 @@
 #import <Foundation/Foundation.h>
 
 
-@interface MulleCommentedLocalizableStrings : NSObject
+// just so convenient...
 
-@property( retain, nonatomic) NSMutableDictionary  *keyValues;
-@property( retain, nonatomic) NSMutableDictionary  *keyComments;
-@property( copy, nonatomic)   NSString             *lastComment;
-@property( copy, nonatomic)   NSString             *translatorScript;
+@interface NSTask( _System)
 
-- (id) initWithContentsOfFile:(NSString *) file;
-- (NSString *) localizableStringsDescription;
-
-- (BOOL) mergeParametersArray:(NSArray *) collection
-                      addOnly:(BOOL) addOnly;
++ (NSString *) systemWithString:(NSString *) s
+               workingDirectory:(NSString *) dir;
 
 @end

@@ -32,10 +32,10 @@ shift
 
 if [ $# -gt 0 ]
 then
-   TEXT="$1"
+   OTEXT="$*"
    shift
 else
-   TEXT="`cat`"
+   OTEXT="`cat`"
 fi
 
 
@@ -62,7 +62,7 @@ SECRET=`url_encode "$SECRET"`
 ID=`url_encode "$ID"`
 FROM=`url_encode "$FROM"`
 TO=`url_encode "$TO"`
-TEXT=`url_encode "$TEXT"`
+TEXT=`url_encode "$OTEXT"`
 
 
 [ ! -z "${SECRET}" ] || fail "SECRET is empty"
@@ -129,5 +129,5 @@ translate()
 
 TOKEN="`get_access_token_if_needed | jq -r .access_token`"
 RESULT="`translate | sed 's/.*\">\(.*\)\<\/string\>/\1/'`"
-echo "Translated \"${TEXT}\" to \"${RESULT}\"" >&2
+echo "Translated \"${OTEXT}\" to \"${RESULT}\"" >&2
 echo "$RESULT"

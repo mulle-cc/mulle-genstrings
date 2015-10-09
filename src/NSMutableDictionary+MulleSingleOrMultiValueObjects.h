@@ -1,6 +1,6 @@
 //
 //  NSMutableDictionary+MulleSingleOrMultiValueObjects.h
-//  Dienstag
+//  mulle-genstrings
 //
 //  Created by Nat! on 12.09.14.
 //  Copyright (c) 2014 Mulle kybernetiK. All rights reserved.

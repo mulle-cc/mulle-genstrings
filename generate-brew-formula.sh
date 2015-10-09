@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/sh -x
 #
 # Generate a formula formulle-xcode-settings stand alone
 #
@@ -6,15 +6,33 @@ PROJECT=MulleGenstrings
 TARGET=mulle-genstrings
 HOMEPAGE="http://www.mulle-kybernetik.com/software/git/${TARGET}"
 DESC="a replacement for Apple's genstrings"
-VERSION="$1"
+
+AGVTAG="`agvtool what-version -terse 2> /dev/null`"
+
+VERSION="${1:-$AGVTAG}"
 shift
-ARCHIVEURL="${1:-http://www.mulle-kybernetik.com/software/git/${TARGET}/tarball/$VERSION}"
+ARCHIVEURL="${1:-http://www.mulle-kybernetik.com/software/git/${TARGET}/tarball/${VERSION}}"
 shift
 
 set -e
 
-[ "$VERSION" = "" ] && exit 1
-[ "$ARCHIVEURL" = "" ] && exit 1
+fail()
+{
+   echo "$@" >&2
+   exit 1
+}
+
+
+[ ! -z "$VERSION"  ]   || fail "no version"
+[ ! -z "$ARCHIVEURL" ] || fail "no archive url"
+
+
+git rev-parse "${VERSION}" >/dev/null 2>&1
+if [ $? -ne 0 ]
+then
+   fail "No tag ${VERSION} found"
+   # could tag and push
+fi
 
 
 TMPARCHIVE="/tmp/${PROJECT}-${VERSION}-archive"

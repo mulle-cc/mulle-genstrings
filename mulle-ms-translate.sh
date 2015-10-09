@@ -17,6 +17,22 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# List of language codes
+# https://msdn.microsoft.com/en-us/library/hh456380.aspx
+
+if [ -z "${NO_COLOR}" ]
+then
+   C_RESET="\033[0m"
+
+   # Foreground colours
+   C_BLACK="\033[0;30m"   C_RED="\033[0;31m"    C_GREEN="\033[0;32m"
+   C_YELLOW="\033[0;33m"  C_BLUE="\033[0;34m"   C_MAGENTA="\033[0;35m"
+   C_CYAN="\033[0;36m"    C_WHITE="\033[0;37m"  C_BR_BLACK="\033[0;90m"
+
+   trap 'printf "${C_RESET}"' TERM EXIT
+fi
+
+
 ID="mulle-genstrings-v0"
 SECRET_PATH="${HOME}/.${ID}/secret"
 TOKEN_PATH="${HOME}/.${ID}/token"
@@ -41,7 +57,7 @@ fi
 
 fail()
 {
-   echo "$@"
+   echo "${C_RED}$*${C_RESET}"
    exit 1
 }
 
@@ -87,34 +103,32 @@ get_access_token()
 
 get_access_token_if_needed()
 {
-   local last_update
    local what
 
    what="$1"
-   last_token="${HOME}/.${ID}/token"
 
 	TOKEN=
-   if [ -f "${last_token}" ]
+   if [ -f "${TOKEN_PATH}" ]
    then
 	   local stale
 
-      stale="`find "${last_token}" -mtime +8m -type f -exec echo '{}' \;`"
+      stale="`find "${TOKEN_PATH}" -mtime +8m -type f -exec echo '{}' \;`"
 	   if [ "$stale" = "" ]
 	  	then
- 		   TOKEN="`cat "${last_token}" || fail "can't read ${last_token}"`"
+ 		   TOKEN="`cat "${TOKEN_PATH}"`" || fail "can't read ${TOKEN_PATH}"
 	  	fi
    fi
 
    if [ -z "${TOKEN}" ]
  	then
 	   TOKEN="`get_access_token`"
+      if [  -z "${TOKEN}" ]
+      then
+         fail "Couldn't get access token, probably your secret is wrong"
+      fi
+      echo "${TOKEN}" > "${TOKEN_PATH}"
 	fi
 
-   if [  -z "${TOKEN}" ]
-	then
-	   fail "Couldn't get access token, probably your secret is wrong"
-	fi
-	echo "${TOKEN}" > "${last_token}"
    echo "${TOKEN}"
 }
 
@@ -127,7 +141,23 @@ translate()
 }
 
 
-TOKEN="`get_access_token_if_needed | jq -r .access_token`"
-RESULT="`translate | sed 's/.*\">\(.*\)\<\/string\>/\1/'`"
-echo "Translated \"${OTEXT}\" to \"${RESULT}\"" >&2
+loop_de_loop()
+{
+   TOKEN="`get_access_token_if_needed | jq -r .access_token`"
+
+   RESULT="`translate | sed 's/.*\">\(.*\)\<\/string\>/\1/'`"
+   echo "${RESULT}" | grep -s "token has expired" > /dev/null
+}
+
+while loop_de_loop
+do
+   TOKEN="`get_access_token`"
+done
+
+if [ -z "${TERSE}" ]
+then
+   echo "Translated ${C_MAGENTA}${OTEXT}${C_RESET} to ${C_CYAN}${RESULT}${C_RESET}" >&2
+fi
+
 echo "$RESULT"
+exit 0

@@ -24,12 +24,19 @@ You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english
 <tt>Localizable.strings</tt> and `mulle-genstrings -a -o de.lproj *.m` for other 
 language projects.
 
+### -c option: clobber existing file
+
+Usually mulle-genstrings tries to merge with previous contents, allowing
+incremental updates.
+
 ### -s option: change search key
 
 You can change the term to search for instead of ""NSLocalizedString"". Useful if
 you follow the suggestions from [\"Localizing library code, the right way ?\"](http://www.mulle-kybernetik.com/weblog/2015/localizing_library_code_the_r.html}.
 
 ### -t option: translate value
+
+> -t implies -c
 
 You can push each localizable strings value through a translate script. The script is specifed with the -t option. Every occurence of {} will be replaced with the value to translate.
 The script should echo the translated value.

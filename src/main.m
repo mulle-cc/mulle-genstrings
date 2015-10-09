@@ -30,10 +30,11 @@ static void   usage()
    fprintf( stderr, "mulle-genstrings [-a][-o <outputDir>] <sources>\n"
            "\n"
            "\t-a addOnly   : don't overwrite key, if it already exists\n"
+           "\t-c clobber   : clobber existing file, don't merge\n"
            "\t-o outputDir : the directory to contain the Localizable.strings file\n"
            "\t-v version   : print version\n"
            "\t-s key       : replace key to search (default is NSLocalizedString)\n"
-           "\t-t script    : translation script to use for value (given as {})\n"
+           "\t-t script    : translation script to use for value (given as {}). Implies -c\n"
            "\n"
            "\tsources      : any kind of text files, probably .m files\n");
    _exit( 1);
@@ -157,12 +158,14 @@ int main( int argc, const char * argv[])
    NSString                           *NSLocalizedStringKey;
    BOOL                               chchchanges;
    BOOL                               addOnly;
+   BOOL                               clobber;
    int                                i;
    
    NSLocalizedStringKey = @"NSLocalizedString";
    translator           = nil;
    
-   addOnly = NO;
+   clobber   = NO;
+   addOnly   = NO;
    @autoreleasepool
    {
       if( argc < 2)
@@ -186,6 +189,13 @@ int main( int argc, const char * argv[])
             continue;
          }
 
+
+         if( ! strcmp( argv[ i], "-c"))
+         {
+            clobber = YES;
+            continue;
+         }
+
          if( ! strcmp( argv[ i], "-s"))
          {
             if( i == argc-1)
@@ -201,6 +211,7 @@ int main( int argc, const char * argv[])
                exit( 1);
 
             translator = [[[NSString alloc] initWithCString:argv[ ++i]] autorelease];
+            clobber    = YES;
             continue;
          }
          
@@ -229,16 +240,22 @@ int main( int argc, const char * argv[])
          if( ! strings)
          {
             /* now merge key/value/comment collection with previous contents */
-            strings = [[[MulleCommentedLocalizableStrings alloc] initWithContentsOfFile:outputFile] autorelease];
-            if( ! strings)
+            strings = nil;
+            if( ! clobber)
             {
-               if( [[NSFileManager defaultManager] fileExistsAtPath:outputFile])
+               strings = [[[MulleCommentedLocalizableStrings alloc] initWithContentsOfFile:outputFile] autorelease];
+               if( ! strings)
                {
-                  NSLog( @"can't parse %@", outputFile);
-                  exit( 1);
+                  if( [[NSFileManager defaultManager] fileExistsAtPath:outputFile])
+                  {
+                     NSLog( @"can't parse %@", outputFile);
+                     exit( 1);
+                  }
                }
-               strings = [[MulleCommentedLocalizableStrings new] autorelease];
             }
+
+            if( ! strings)
+               strings = [[MulleCommentedLocalizableStrings new] autorelease];
             [strings setTranslatorScript:translator];
          }
       

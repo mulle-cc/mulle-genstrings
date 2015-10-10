@@ -29,7 +29,7 @@ then
    C_YELLOW="\033[0;33m"  C_BLUE="\033[0;34m"   C_MAGENTA="\033[0;35m"
    C_CYAN="\033[0;36m"    C_WHITE="\033[0;37m"  C_BR_BLACK="\033[0;90m"
 
-   trap 'printf "${C_RESET}"' TERM EXIT
+   trap 'printf "${C_RESET}" >&2' TERM EXIT
 fi
 
 
@@ -57,7 +57,7 @@ fi
 
 fail()
 {
-   echo "${C_RED}$*${C_RESET}"
+   echo "mulle-ms-translate.sh: ${C_RED}$*${C_RESET}"
    exit 1
 }
 
@@ -107,31 +107,30 @@ get_access_token_if_needed()
 
    what="$1"
 
-	TOKEN=
+   TOKEN=
    if [ -f "${TOKEN_PATH}" ]
    then
-	   local stale
+      local stale
 
       stale="`find "${TOKEN_PATH}" -mtime +8m -type f -exec echo '{}' \;`"
-	   if [ "$stale" = "" ]
-	  	then
- 		   TOKEN="`cat "${TOKEN_PATH}"`" || fail "can't read ${TOKEN_PATH}"
-	  	fi
+      if [ "$stale" = "" ]
+      then
+         TOKEN="`cat "${TOKEN_PATH}"`" || fail "can't read ${TOKEN_PATH}"
+      fi
    fi
 
    if [ -z "${TOKEN}" ]
- 	then
-	   TOKEN="`get_access_token`"
+   then
+      TOKEN="`get_access_token`"
       if [  -z "${TOKEN}" ]
       then
          fail "Couldn't get access token, probably your secret is wrong"
       fi
       echo "${TOKEN}" > "${TOKEN_PATH}"
-	fi
+   fi
 
    echo "${TOKEN}"
 }
-
 
 
 translate()

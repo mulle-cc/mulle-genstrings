@@ -21,13 +21,22 @@ Assuming your project is in english and you wrote:
 	NSLocalizedString( @"foo", @"this is foo as a verb");
 
 You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english 
-<tt>Localizable.strings</tt> and `mulle-genstrings -a -o de.lproj *.m` for other 
-language projects.
+<tt>Localizable.strings</tt> and `mulle-genstrings -a -m de.lproj -o de.lproj *.m` 
+for other language projects. This will ensure, that old translations will not be 
+overwritten and new keys are added.
 
-### -c option: clobber existing file
+### -f option: force output
 
-Usually mulle-genstrings tries to merge with previous contents, allowing
-incremental updates.
+If mulle-genstrings doesn't find any localizable strings, no output will be 
+generated. You can force the generation of an output file with "-f".
+
+
+### -m option: specify merge source
+
+mulle-genstrings can merge strings files. Here you specify a source, that you 
+want to merge with. Specify additionally "-a" if you want to keep the original 
+values intact.
+
 
 ### -s option: change search key
 
@@ -35,8 +44,6 @@ You can change the term to search for instead of ""NSLocalizedString"". Useful i
 you follow the suggestions from [\"Localizing library code, the right way ?\"](http://www.mulle-kybernetik.com/weblog/2015/localizing_library_code_the_r.html}.
 
 ### -t option: translate value
-
-> -t implies -c
 
 You can push each localizable strings value through a translate script. The script is specifed with the -t option. Every occurence of {} will be replaced with the value to translate.
 The script should echo the translated value.
@@ -47,7 +54,12 @@ to translate pages. You would call **mulle-genstrings** with `-t "./mulle-ms-tra
 In order for this script to work, you have to register with Microsoft and get the proper secret into `~/.mulle-genstrings-v0/secret`. Currently the MS translation API is free for small loads.
                                                                                
                                                                                
-                                                                               
+## Releasenotes
+
+*** 18.48.4 ***
+                      
+genstrings doesn't merge anymore by default, you have to explicity specify a
+strings file to merge with "-m".
                                                                            
 ## Author
 

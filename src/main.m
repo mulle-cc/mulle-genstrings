@@ -27,16 +27,19 @@
 
 static void   usage()
 {
-   fprintf( stderr, "mulle-genstrings [-a][-o <outputDir>] <sources>\n"
+   fprintf( stderr, "mulle-genstrings [options] <sources>\n"
            "\n"
-           "\t-a addOnly   : don't overwrite key, if it already exists\n"
-           "\t-c clobber   : clobber existing file, don't merge\n"
-           "\t-o outputDir : the directory to contain the Localizable.strings file\n"
-           "\t-v version   : print version\n"
-           "\t-s key       : replace key to search (default is NSLocalizedString)\n"
-           "\t-t script    : translation script to use for value (given as {}). Implies -c\n"
+           "options\n"
+           "\t-a        : don't overwrite key, if it already exists\n"
+           "\t-f        : force reading and writing of Localizable.strings file\n"
+           "\t-m input  : the directory to contain the source Localizable.strings (or the filename)\n"
+           "\t-o output : the directory to contain the Localizable.strings (or the filename)\n"
+           "\t-v        : print version\n"
+           "\t-s key    : replace key to search (default is NSLocalizedString)\n"
+           "\t-t script : translation script to use for value (given as {}).\n"
            "\n"
-           "\tsources      : any kind of text files, probably .m files\n");
+           "sources\n"
+           "\t          : any kind of text files, probably .m files\n");
    _exit( 1);
 }
 
@@ -134,6 +137,7 @@ static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings, 
       return( 0);
    }
    
+   error = nil;
    if( ! [output writeToFile:outputFile
                   atomically:YES
                     encoding:NSUTF16StringEncoding
@@ -148,38 +152,79 @@ static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings, 
 }
 
 
+MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
+{
+   MulleCommentedLocalizableStrings   *strings;
+   /* now merge key/value/comment collection with previous contents */
+   strings = nil;
+   if( file)
+   {
+      /* trick: translate strings file by moving them to output
+       and then getting them merged (don't use -c) */
+      strings = [[[MulleCommentedLocalizableStrings alloc] initWithContentsOfFile:file] autorelease];
+      if( ! strings)
+      {
+         if( [[NSFileManager defaultManager] fileExistsAtPath:file])
+         {
+            NSLog( @"can't parse %@", file);
+            exit( 1);
+         }
+      }
+   }
+   
+   if( ! strings)
+      strings = [[MulleCommentedLocalizableStrings new] autorelease];
+   return( strings);
+}
+
+static NSString  *completeLocalizableStringsFile( NSString *file)
+{
+   BOOL isDirectory;
+   
+   if( [[NSFileManager defaultManager] fileExistsAtPath:file
+                                            isDirectory:&isDirectory] && isDirectory)
+   {
+      file = [file stringByAppendingPathComponent:@"Localizable.strings"];
+   }
+   return( file);
+}
+
+
 int main( int argc, const char * argv[])
 {
    MulleCommentedLocalizableStrings   *strings;
    NSArray                            *collection;
    NSString                           *outputFile;
+   NSString                           *mergeFile;
    NSString                           *inputFile;
    NSString                           *translator;
    NSString                           *NSLocalizedStringKey;
    BOOL                               chchchanges;
    BOOL                               addOnly;
-   BOOL                               clobber;
+   BOOL                               force;
    int                                i;
    
    NSLocalizedStringKey = @"NSLocalizedString";
    translator           = nil;
    
-   clobber   = NO;
-   addOnly   = NO;
+   addOnly = NO;
+   force   = NO;
+   
    @autoreleasepool
    {
       if( argc < 2)
          usage();
    
-      outputFile      = nil;
-      strings         = nil;
+      outputFile  = nil;
+      strings     = nil;
       chchchanges = YES;
+      mergeFile   = nil;
       
       for( i = 1; i < argc; i++)
       {
          if( ! strcmp( argv[ i], "-v"))
          {
-            fprintf( stderr, "mulle-genstrings v18.48.3\n");
+            fprintf( stderr, "mulle-genstrings v18.48.4\n");
             continue;
          }
 
@@ -189,13 +234,39 @@ int main( int argc, const char * argv[])
             continue;
          }
 
-
-         if( ! strcmp( argv[ i], "-c"))
+         if( ! strcmp( argv[ i], "-f"))
          {
-            clobber = YES;
+            force = YES;
             continue;
          }
 
+         if( ! strcmp( argv[ i], "-h") || ! strcmp( argv[ i], "--help"))
+            usage();
+
+         if( ! strcmp( argv[ i], "-m"))
+         {
+            if( strings || mergeFile || ++i >= argc)
+               usage();
+            
+            mergeFile = [NSString stringWithCString:argv[ i]];
+            mergeFile = completeLocalizableStringsFile( mergeFile);
+            
+            strings = setup_strings( mergeFile);
+            
+            continue;
+         }
+         
+         if( ! strcmp( argv[ i], "-o"))
+         {
+            if( outputFile || ++i >= argc)
+               usage();
+            
+            outputFile = [NSString stringWithCString:argv[ i]];
+            outputFile = completeLocalizableStringsFile( outputFile);
+            chchchanges = NO;  // do change tracking
+            continue;
+         }
+      
          if( ! strcmp( argv[ i], "-s"))
          {
             if( i == argc-1)
@@ -211,22 +282,9 @@ int main( int argc, const char * argv[])
                exit( 1);
 
             translator = [[[NSString alloc] initWithCString:argv[ ++i]] autorelease];
-            clobber    = YES;
             continue;
          }
-         
-         if( ! strcmp( argv[ i], "-o"))
-         {
-            if( outputFile || ++i >= argc)
-               usage();
-            
-            outputFile = [NSString stringWithCString:argv[ i]];
-            outputFile = [outputFile stringByAppendingPathComponent:@"Localizable.strings"];
 
-            chchchanges = NO;  // do change tracking
-            continue;
-         }
-      
          @autoreleasepool
          {
             inputFile = [NSString stringWithCString:argv[ i]];
@@ -238,26 +296,7 @@ int main( int argc, const char * argv[])
          }
       
          if( ! strings)
-         {
-            /* now merge key/value/comment collection with previous contents */
-            strings = nil;
-            if( ! clobber)
-            {
-               strings = [[[MulleCommentedLocalizableStrings alloc] initWithContentsOfFile:outputFile] autorelease];
-               if( ! strings)
-               {
-                  if( [[NSFileManager defaultManager] fileExistsAtPath:outputFile])
-                  {
-                     NSLog( @"can't parse %@", outputFile);
-                     exit( 1);
-                  }
-               }
-            }
-
-            if( ! strings)
-               strings = [[MulleCommentedLocalizableStrings new] autorelease];
-            [strings setTranslatorScript:translator];
-         }
+            strings = setup_strings( nil);
       
          @autoreleasepool
          {
@@ -268,8 +307,11 @@ int main( int argc, const char * argv[])
       }
    
       /* changed something ? then update */
-      if( chchchanges)
+      if( chchchanges || force)
+      {
+         [strings setTranslatorScript:translator];
          return( writeLocalizableStrings( strings, outputFile));
+      }
    }
    
    return( 0);

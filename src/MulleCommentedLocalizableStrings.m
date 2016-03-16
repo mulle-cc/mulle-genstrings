@@ -167,7 +167,7 @@
    
    _keyValues   = [NSMutableDictionary new];
    _keyComments = [NSMutableDictionary new];
-   
+   _verbose     = getenv( "VERBOSE") != NULL;
    return( self);
 }
 
@@ -223,6 +223,14 @@
    {
       if( ! addOnly || ! oldValue)
       {
+         if( _verbose)
+         {
+            if( oldValue)
+               NSLog( @"--> update \"%@\"", key);
+            else
+               NSLog( @"--> add \"%@\"", key);
+         }
+         
          [_keyValues setObject:value
                         forKey:key];
          chchchchchanges = YES;
@@ -235,6 +243,9 @@
    {
       if( comment)
       {
+         if( _verbose)
+            NSLog( @"--> add comment to \"%@\"", key);
+            
          [_keyComments mulleAddObject:comment
                                forKey:key];
          return( YES);
@@ -245,6 +256,9 @@
    if( [comments containsObject:comment])
       return( chchchchchanges);
    
+   if( _verbose)
+      NSLog( @"--> add comment to \"%@\"", key);
+
    [_keyComments mulleAddObject:comment
                withSortSelector:@selector( mulleCaseInsensitiveCompare:)
                          forKey:key];

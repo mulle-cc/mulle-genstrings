@@ -56,10 +56,16 @@ In order for this script to work, you have to register with Microsoft and get th
                                                                                
 ## Releasenotes
 
+*** 18.48.5 ***
+
+* use VERBOSE environment variable to slightly more output
+* fix a variety of (apparently harmless) bugs introduced by being able to 
+specify the "-s" option.
+
 *** 18.48.4 ***
                       
-genstrings doesn't merge anymore by default, you have to explicity specify a
-strings file to merge with "-m".
+* genstrings doesn't merge anymore by default, you have to explicity specify a
+  strings file to merge with "-m".
                                                                            
 ## Author
 

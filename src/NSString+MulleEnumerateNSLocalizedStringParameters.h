@@ -21,9 +21,20 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum
+{
+   NSLocalizedStringCall = 0,
+   NSLocalizedStringFromTableCall,
+   NSLocalizedStringFromTableInBundleCall,
+   NSLocalizedStringWithDefaultValueCall
+} NSLocalizedStringCallType;
+
 
 @interface NSString ( MulleEnumerateNSLocalizedStringParameters)
 
 - (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key;
+
+- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key
+                                                        type:(NSLocalizedStringCallType) type;
 
 @end

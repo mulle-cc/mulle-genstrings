@@ -28,6 +28,7 @@
 @property( retain, nonatomic) NSMutableDictionary  *keyComments;
 @property( copy, nonatomic)   NSString             *lastComment;
 @property( copy, nonatomic)   NSString             *translatorScript;
+@property( assign, nonatomic) BOOL                 verbose;
 
 - (id) initWithContentsOfFile:(NSString *) file;
 - (NSString *) localizableStringsDescription;

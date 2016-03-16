@@ -4,14 +4,14 @@
 #
 PROJECT=MulleGenstrings
 TARGET=mulle-genstrings
-HOMEPAGE="http://www.mulle-kybernetik.com/software/git/${TARGET}"
+HOMEPAGE="https://www.mulle-kybernetik.com/software/git/${TARGET}"
 DESC="a replacement for Apple's genstrings"
 
 AGVTAG="`agvtool what-version -terse 2> /dev/null`"
 
 VERSION="${1:-$AGVTAG}"
 shift
-ARCHIVEURL="${1:-http://www.mulle-kybernetik.com/software/git/${TARGET}/tarball/${VERSION}}"
+ARCHIVEURL="${1:-https://www.mulle-kybernetik.com/software/git/${TARGET}/tarball/${VERSION}}"
 shift
 
 set -e

@@ -97,9 +97,9 @@ static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
    NSString           *input;
    NSEnumerator       *rover;
    NSArray            *parameters;
-   NSMutableArray     *collection;
+   NSMutableSet       *collection;
    
-   collection = [NSMutableArray array];
+   collection = [NSMutableSet set];
    @autoreleasepool
    {
       input = valiantlyOpenFile( file);
@@ -121,7 +121,7 @@ static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
          [collection addObject:parameters];
       }
    }
-   return( collection);
+   return( [collection allObjects]);
 }
 
 
@@ -155,6 +155,7 @@ static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings, 
 MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
 {
    MulleCommentedLocalizableStrings   *strings;
+   
    /* now merge key/value/comment collection with previous contents */
    strings = nil;
    if( file)
@@ -170,12 +171,19 @@ MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
             exit( 1);
          }
       }
+      if( getenv( "VERBOSE"))
+         NSLog( @"read contents of %@ (%ld entries)", file, (long) [[strings keyValues] count]);
    }
    
    if( ! strings)
+   {
       strings = [[MulleCommentedLocalizableStrings new] autorelease];
+      if( getenv( "VERBOSE"))
+         NSLog( @"creating fresh strings");
+   }
    return( strings);
 }
+
 
 static NSString  *completeLocalizableStringsFile( NSString *file)
 {
@@ -224,7 +232,7 @@ int main( int argc, const char * argv[])
       {
          if( ! strcmp( argv[ i], "-v"))
          {
-            fprintf( stderr, "mulle-genstrings v18.48.4\n");
+            fprintf( stderr, "mulle-genstrings v18.48.5\n");
             continue;
          }
 
@@ -291,7 +299,9 @@ int main( int argc, const char * argv[])
             collection = parameterCollectionFromFile( inputFile, NSLocalizedStringKey);
             if( ! [collection count])
                continue;
-            
+
+            if( getenv( "VERBOSE"))
+               NSLog( @"%@ contains %ld occurrences of %@", inputFile, (long) [collection count], NSLocalizedStringKey);
             [collection retain];
          }
       

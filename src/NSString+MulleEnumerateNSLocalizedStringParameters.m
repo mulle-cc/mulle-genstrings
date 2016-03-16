@@ -27,6 +27,7 @@
 @interface NSData ( MulleNSLocalizedStringEnumerator)
 
 - (NSArray *) mulleUTF16NSLocalizedStringParametersWithCharacterRange:(NSRange) range
+                                                                 type:(NSLocalizedStringCallType) type
                                            numberOfConsumedCharacters:(NSUInteger *) consumed;
 
 @end
@@ -34,40 +35,19 @@
 
 @implementation  NSData( MulleNSLocalizedStringEnumerator)
 
-typedef enum
-{
-   NSLocalizedStringCall = 0,
-   NSLocalizedStringFromTableCall,
-   NSLocalizedStringFromTableInBundleCall,
-   NSLocalizedStringWithDefaultValueCall
-} NSLocalizedStringCallType;
-
-
-static NSLocalizedStringCallType  callTypeForString( NSString *s)
-{
-   switch( [s length])
-   {
-   default : return( NSLocalizedStringCall);
-   case 26 : return( NSLocalizedStringFromTableCall);
-   case 34 : return( NSLocalizedStringFromTableInBundleCall);
-   case 33 : return( NSLocalizedStringWithDefaultValueCall);
-   }
-}
-
 
 //
 // uniform output: key, value, comment
 //
 - (NSMutableArray *) mulleParseNSLocalizedStringParameters:(parser *) p
+                                                      type:(NSLocalizedStringCallType) type
 {
-   NSString         *s;
    NSUInteger       n;
    NSMutableArray   *array;
    
    parser_memorize( p, &p->memo_interesting);
 
-   s = parser_do_identifier( p);
- 
+   parser_do_identifier( p);
    parser_skip_whitespace_and_comments( p);
  
    array = parser_do_array( p);
@@ -75,7 +55,7 @@ static NSLocalizedStringCallType  callTypeForString( NSString *s)
       return( nil);
    
    n = [array count];
-   switch( callTypeForString( s))
+   switch( type)
    {
    case NSLocalizedStringCall :
       if( n != 2)
@@ -83,7 +63,7 @@ static NSLocalizedStringCallType  callTypeForString( NSString *s)
       [array insertObject:[array objectAtIndex:0]
                   atIndex:1];
       break;
-#if 0
+
    case NSLocalizedStringFromTableCall :
       if( n != 3)
          return( nil);
@@ -107,7 +87,6 @@ static NSLocalizedStringCallType  callTypeForString( NSString *s)
       [array removeObjectAtIndex:1];
       [array removeObjectAtIndex:1];
       break;
-#endif
 
    default :
       return( nil);
@@ -127,7 +106,8 @@ static NSLocalizedStringCallType  callTypeForString( NSString *s)
 
 
 - (NSArray *) mulleUTF16NSLocalizedStringParametersWithCharacterRange:(NSRange) range
-                                          numberOfConsumedCharacters:(NSUInteger *) consumed
+                                                                 type:(NSLocalizedStringCallType) type
+                                           numberOfConsumedCharacters:(NSUInteger *) consumed
 {
    parser    p;
    NSArray   *values;
@@ -140,7 +120,8 @@ NS_DURING
    parser_init( &p, &buf[ range.location], range.length);
    parser_set_error_callback( &p, self, @selector( parserErrorInFileName:lineNumber:reason:));
    
-   values    = [self mulleParseNSLocalizedStringParameters:&p];
+   values    = [self mulleParseNSLocalizedStringParameters:&p
+                                                      type:type];
    *consumed = p.curr - p.buf;
 NS_HANDLER
    *consumed = 0;
@@ -164,6 +145,8 @@ NS_ENDHANDLER
    NSData       *_data;
    NSData       *_searchData;
    NSUInteger   _searchLen;
+   
+   NSLocalizedStringCallType   _type;
 }
 @end
 
@@ -181,17 +164,23 @@ NS_ENDHANDLER
 
 - (id) initWithString:(NSString *) s
             searchKey:(NSString *) key
+                 type:(NSLocalizedStringCallType) type
 {
+   NSData   *data;
    if( self = [super init])
    {
-      _searchLen = [key length];
-
-      _length = [s length];
-      _range  = NSMakeRange( 1, _length - 1);  // skip leading 0xFEFF
-      _data   = [[s dataUsingEncoding:NSUTF16StringEncoding] retain];
+      _type   = type;
       
-      _searchData = [key dataUsingEncoding:NSUTF16StringEncoding];
-      _searchData = [[_searchData subdataWithRange:NSMakeRange( 1 * sizeof( unichar), _searchLen * sizeof( unichar))] retain];
+      _data   = [[s dataUsingEncoding:NSUTF16StringEncoding] retain];
+      _length = [_data length] / sizeof( unichar);
+      _range  = NSMakeRange( 0, _length);
+      
+      // snip off BOM from search key
+      data = [key dataUsingEncoding:NSUTF16StringEncoding];
+      data = [data subdataWithRange:NSMakeRange( sizeof( unichar), [data length] - sizeof( unichar))];
+      
+      _searchLen  = [data length] / sizeof( unichar);
+      _searchData = [data retain];
    }
    return( self);
 }
@@ -200,42 +189,53 @@ NS_ENDHANDLER
 - (id) nextObject
 {
    NSRange      range;
+   NSRange      consumeRange;
    NSArray      *parameters;
    NSUInteger   consumed;
    
+retry:
    if( ! _range.length)
       return( nil);
    
-   range = [_data rangeOfData:_searchData
-                      options:0
-                        range:NSMakeRange( _range.location * sizeof( unichar), _range.length * sizeof( unichar))];
-   
-   if( ! range.length)
+   // search in data, but treat range as "unichar" unit
    {
-      _range.length = 0;
-      return( nil);
+      range = [_data rangeOfData:_searchData
+                         options:0
+                           range:NSMakeRange( _range.location * sizeof( unichar), _range.length * sizeof( unichar))];
+      
+      if( ! range.length)
+      {
+         _range.length = 0;
+         return( nil);
+      }
+      
+      NSParameterAssert( ! (range.location & (sizeof( unichar) - 1)));
+      NSParameterAssert( ! (range.length & (sizeof( unichar) - 1)));
+      
+      range.location /= sizeof( unichar);
+      range.length   /= sizeof( unichar);
    }
-   NSParameterAssert( ! (range.location & (sizeof( unichar) - 1)));
-   NSParameterAssert( ! (range.length & (sizeof( unichar) - 1)));
    
-   range.location /= sizeof( unichar);
-   range.length   /= sizeof( unichar);
+   consumeRange.location = range.location;
+   consumeRange.length   = _length - consumeRange.location;
    
-   range.length = _length - range.location;
-   parameters   = [_data mulleUTF16NSLocalizedStringParametersWithCharacterRange:range
-                                                      numberOfConsumedCharacters:&consumed];
+   parameters = [_data mulleUTF16NSLocalizedStringParametersWithCharacterRange:consumeRange
+                                                                          type:_type
+                                                    numberOfConsumedCharacters:&consumed];
    
    if( ! parameters)
    {
       NSParameterAssert( _range.length >= _searchLen);
+   
       _range.location += _searchLen;  //
       _range.length   -= _searchLen ;
-      return( [self nextObject]);  // try again
+      goto retry;
    }
    
   NSParameterAssert( _range.length >= consumed);
-   _range.location += consumed;
-   _range.length   -= consumed;
+
+   _range.location = range.location + consumed;
+   _range.length   = _length - _range.location ;
    
    return( parameters);
 }
@@ -246,9 +246,17 @@ NS_ENDHANDLER
 @implementation NSString ( MulleEnumerateNSLocalizedStringParameters)
 
 - (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key
+                                                        type:(NSLocalizedStringCallType) type
 {
    return( [[[MulleNSLocalizedStringEnumerator alloc] initWithString:self
-                                                           searchKey:key] autorelease]);
+                                                           searchKey:key
+                                                                type:type] autorelease]);
+}
+
+- (NSEnumerator *) mulleEnumerateNSLocalizedStringParameters:(NSString *) key
+{
+   return( [self mulleEnumerateNSLocalizedStringParameters:key
+                                                      type:NSLocalizedStringCall]);
 }
 
 @end

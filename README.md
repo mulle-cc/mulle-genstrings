@@ -25,6 +25,10 @@ You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english
 for other language projects. This will ensure, that old translations will not be 
 overwritten and new keys are added.
 
+### -a option: append only
+
+Only useful in conjunction with the -m option, this will not overwrite previous values for keys.
+
 ### -f option: force output
 
 If mulle-genstrings doesn't find any localizable strings, no output will be 
@@ -33,15 +37,15 @@ generated. You can force the generation of an output file with "-f".
 
 ### -m option: specify merge source
 
-mulle-genstrings can merge strings files. Here you specify a source, that you 
-want to merge with. Specify additionally "-a" if you want to keep the original 
+**mulle-genstrings** can merge strings files. Here you specify a source, that you 
+want to merge with. Additionally specify "-a" if you want to keep the original 
 values intact.
 
 
 ### -s option: change search key
 
-You can change the term to search for instead of ""NSLocalizedString"". Useful if
-you follow the suggestions from [\"Localizing library code, the right way ?\"](http://www.mulle-kybernetik.com/weblog/2015/localizing_library_code_the_r.html}.
+You can change the term to search for instead of `NSLocalizedString`. Useful if
+you follow the suggestions from [Localizing library code, the right way ?](//www.mulle-kybernetik.com/weblog/2015/localizing_library_code_the_r.html).
 
 ### -t option: translate value
 

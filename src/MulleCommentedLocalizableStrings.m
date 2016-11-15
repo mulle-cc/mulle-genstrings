@@ -23,6 +23,7 @@
 #import "NSTask+System.h"
 #import "NSString+MulleQuotedString.h"
 #import "NSString+MulleCaseInsensitiveCompare.h"
+#import "NSString+MulleValiantFile.h"
 #import "NSMutableDictionary+MulleSingleOrMultiValueObjects.h"
 #import "parser.h"
 
@@ -42,10 +43,20 @@
 - (void) parseComment:(parser *) p
 {
    parser_skip_peeked_character( p, '/');
-   parser_do_token_character( p, '*');
+
+   // treat // comments as real "invisible" comments
+   if( parser_peek_character( p) == '/')
+   {
+      parser_skip_after_newline( p);
+      return;
+   }
+   else
+   {
+      parser_do_token_character( p, '*');
    
-   if( ! parser_grab_text_until_comment_end( p))
-      parser_error( p, "unexpected end of file in comment");
+      if( ! parser_grab_text_until_comment_end( p))
+         parser_error( p, "unexpected end of file in comment");
+   }
 
    [_lastComment autorelease];
    _lastComment = [[NSString alloc] initWithCharacters:p->memo.curr
@@ -73,8 +84,7 @@
    parser_do_token_character( p, ';');
 
    if( [_keyValues objectForKey:key])
-      [NSException raise:NSInvalidArgumentException
-                  format:@"duplicate key %@ found", key];
+      NSLog( @"duplicate key \"%@\" found, will overwrite previous value", key);
 
    [_keyValues setObject:value
                   forKey:key];
@@ -182,7 +192,7 @@
    if( ! self)
       return( self);
    
-   s = [NSString stringWithContentsOfFile:file];
+   s = [NSString stringWithValiantlyDeterminedContentsOfFile:file];
    if( ! s)
    {
       [self autorelease];

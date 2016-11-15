@@ -58,19 +58,7 @@ to translate pages. You would call **mulle-genstrings** with `-t "./mulle-ms-tra
 In order for this script to work, you have to register with Microsoft and get the proper secret into `~/.mulle-genstrings-v0/secret`. Currently the MS translation API is free for small loads.
                                                                                
                                                                                
-## Releasenotes
-
-*** 18.48.5 ***
-
-* use VERBOSE environment variable to slightly more output
-* fix a variety of (apparently harmless) bugs introduced by being able to 
-specify the "-s" option.
-
-*** 18.48.4 ***
-                      
-* genstrings doesn't merge anymore by default, you have to explicity specify a
-  strings file to merge with "-m".
-                                                                           
+                                                                       
 ## Author
 
 Coded by Nat! on 16.10.2014

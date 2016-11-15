@@ -77,6 +77,8 @@ NSString  *parser_do_identifier( parser *p);
 void   parser_skip_whitespace( parser *p);
 void   parser_skip_whitespace_and_comments( parser *p);
 
+void   parser_skip_after_newline( parser *p);
+
 /*
  *
  */

@@ -17,6 +17,8 @@
 		415F7B9819EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9719EFF42A00A7562A /* NSString+MulleEnumerateNSLocalizedStringParameters.m */; };
 		415F7B9A19EFF69000A7562A /* parser.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7B9919EFF69000A7562A /* parser.m */; };
 		415F7BA119F0544800A7562A /* NSString+MulleQuotedString.m in Sources */ = {isa = PBXBuildFile; fileRef = 415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */; };
+		41C08C871DDB301A00F2FD99 /* RELEASENOTES.md in Sources */ = {isa = PBXBuildFile; fileRef = 41C08C861DDB301A00F2FD99 /* RELEASENOTES.md */; };
+		41C08C8A1DDB340300F2FD99 /* NSString+MulleValiantFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C08C891DDB340300F2FD99 /* NSString+MulleValiantFile.m */; };
 		41F4076D1BC2D14F00359BA7 /* NSTask+System.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F4076C1BC2D14F00359BA7 /* NSTask+System.m */; };
 /* End PBXBuildFile section */
 
@@ -53,6 +55,9 @@
 		415F7B9B19EFF6E900A7562A /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		415F7B9F19F0544800A7562A /* NSString+MulleQuotedString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleQuotedString.h"; sourceTree = "<group>"; };
 		415F7BA019F0544800A7562A /* NSString+MulleQuotedString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleQuotedString.m"; sourceTree = "<group>"; };
+		41C08C861DDB301A00F2FD99 /* RELEASENOTES.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = RELEASENOTES.md; sourceTree = "<group>"; };
+		41C08C881DDB340300F2FD99 /* NSString+MulleValiantFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleValiantFile.h"; sourceTree = "<group>"; };
+		41C08C891DDB340300F2FD99 /* NSString+MulleValiantFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleValiantFile.m"; sourceTree = "<group>"; };
 		41F4076B1BC2D14F00359BA7 /* NSTask+System.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTask+System.h"; sourceTree = "<group>"; };
 		41F4076C1BC2D14F00359BA7 /* NSTask+System.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSTask+System.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -73,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				4141F06219F0782B0041FC63 /* README.md */,
+				41C08C861DDB301A00F2FD99 /* RELEASENOTES.md */,
 				41106EAA19EF3070000CC2B6 /* src */,
 				412E53B61BC8477C0082DD5E /* MS Translation Scripts */,
 				41106EA719EF3070000CC2B6 /* Frameworks */,
@@ -114,6 +120,8 @@
 				415F7B9919EFF69000A7562A /* parser.m */,
 				41F4076B1BC2D14F00359BA7 /* NSTask+System.h */,
 				41F4076C1BC2D14F00359BA7 /* NSTask+System.m */,
+				41C08C881DDB340300F2FD99 /* NSString+MulleValiantFile.h */,
+				41C08C891DDB340300F2FD99 /* NSString+MulleValiantFile.m */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -185,6 +193,8 @@
 				415F7B9A19EFF69000A7562A /* parser.m in Sources */,
 				41106EAC19EF3070000CC2B6 /* main.m in Sources */,
 				41F4076D1BC2D14F00359BA7 /* NSTask+System.m in Sources */,
+				41C08C871DDB301A00F2FD99 /* RELEASENOTES.md in Sources */,
+				41C08C8A1DDB340300F2FD99 /* NSString+MulleValiantFile.m in Sources */,
 				4141F06819F0826F0041FC63 /* NSMutableDictionary+MulleSingleOrMultiValueObjects.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

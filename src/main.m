@@ -23,6 +23,9 @@
 
 #import "MulleCommentedLocalizableStrings.h"
 #import "NSString+MulleEnumerateNSLocalizedStringParameters.h"
+#import "NSString+MulleValiantFile.h"
+
+#define VERSION   "v18.48.6"
 
 
 static void   usage()
@@ -44,50 +47,32 @@ static void   usage()
 }
 
 
-static NSStringEncoding   encodings[] =
+static struct
 {
-   NSUTF8StringEncoding,
-   NSNonLossyASCIIStringEncoding,
-   NSMacOSRomanStringEncoding,
-   NSISOLatin1StringEncoding,
-   NSNEXTSTEPStringEncoding,
-   NSUTF16LittleEndianStringEncoding,
-   NSUTF16BigEndianStringEncoding,
-   NSUTF32StringEncoding,
-   0
+   NSStringEncoding  code;
+   char              *name;
+} encodings[] =
+{
+   { NSUTF8StringEncoding,              "NSUTF8StringEncoding" },
+   { NSNonLossyASCIIStringEncoding,     "NSNonLossyASCIIStringEncoding" },
+   { NSUTF32StringEncoding,             "NSUTF32StringEncoding" },
+   { NSUTF16LittleEndianStringEncoding, "NSUTF16LittleEndianStringEncoding" },
+   { NSUTF16BigEndianStringEncoding,    "NSUTF16BigEndianStringEncoding" },
+   { NSMacOSRomanStringEncoding,        "NSMacOSRomanStringEncoding" },
+   { NSISOLatin1StringEncoding,         "NSISOLatin1StringEncoding" },
+   { NSNEXTSTEPStringEncoding,          "NSNEXTSTEPStringEncoding" },
+   { 0, 0 }
 };
+
 
 
 static NSString   *valiantlyOpenFile( NSString *file)
 {
-   NSError      *error;
-   NSData       *data;
-   NSString     *s;
-   NSUInteger   i;
+   NSString  *s;
    
-   s    = nil;
-   data = [NSData dataWithContentsOfFile:file
-                                 options:0
-                                   error:&error];
-   if( ! data)
-   {
-      fprintf( stderr, "Failed to open \"%s\": %s\n",
-           [file fileSystemRepresentation],
-           [[error localizedFailureReason] fileSystemRepresentation]);
-      exit( 1);
-   }
-   
-   for( i = 0; encodings[ i]; i++)
-   {
-      s = [[[NSString alloc] initWithData:data
-                                 encoding:encodings[ i]] autorelease];
-      if( s)
-         return( s);
-   }
-   
-   fprintf( stderr, "Failed to read \"%s\": %s\n",
-           [file fileSystemRepresentation],
-           data ? [[error description] UTF8String] : "unknown encoding");
+   s = [NSString stringWithValiantlyDeterminedContentsOfFile:file];
+   if( s)
+      return( s);
    exit( 1);
 }
 
@@ -232,7 +217,7 @@ int main( int argc, const char * argv[])
       {
          if( ! strcmp( argv[ i], "-v"))
          {
-            fprintf( stderr, "mulle-genstrings v18.48.5\n");
+            fprintf( stderr, "mulle-genstrings " VERSION "\n");
             continue;
          }
 

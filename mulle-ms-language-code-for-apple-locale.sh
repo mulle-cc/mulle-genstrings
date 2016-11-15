@@ -9,7 +9,7 @@ then
    C_YELLOW="\033[0;33m"  C_BLUE="\033[0;34m"   C_MAGENTA="\033[0;35m"
    C_CYAN="\033[0;36m"    C_WHITE="\033[0;37m"  C_BR_BLACK="\033[0;90m"
 
-   trap 'printf "${C_RESET}" >&2' TERM EXIT
+   trap 'printf "${C_RESET}" >&2 ; exit 1' TERM INT
 fi
 
 
@@ -65,7 +65,7 @@ IDENTIFIER="${1}"
 
 fail()
 {
-   echo "mulle-ms-language-code-for-apple-locale.sh: ${C_RED}$*${C_RESETALL}" >&2
+   echo "mulle-ms-language-code-for-apple-locale.sh: ${C_RED}$*${C_RESET}" >&2
    exit 1
 }
 

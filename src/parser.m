@@ -186,7 +186,7 @@ int   parser_skip_text_until_comment_end( parser *p)
 }
 
 
-static void   parser_skip_after_newline( parser *p)
+void   parser_skip_after_newline( parser *p)
 {
    unichar   c;
    

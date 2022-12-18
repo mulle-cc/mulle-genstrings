@@ -54,7 +54,7 @@ static void   usage()
            "\t-t script : translation script to use for value (given as {}).\n"
            "\t-u        : don't add keys\n"
            "\n");
-   _exit( 1);
+   exit( 1);
 }
 
 
@@ -244,7 +244,7 @@ static MulleCommentedLocalizableStrings
 }
 
 
-int main( int argc, const char * argv[])
+int main( int argc,  char *argv[])
 {
    MulleCommentedLocalizableStrings   *strings;
    MulleCommentedLocalizableStrings   *inputStrings;
@@ -265,7 +265,7 @@ int main( int argc, const char * argv[])
    force        = NO;
    isDictionary = NO;
    mergeMode    = MergeReplace;
-   verbose      = getenv( "VERBOSE");
+   verbose      = getenv( "VERBOSE") != NULL;
 
    @autoreleasepool
    {

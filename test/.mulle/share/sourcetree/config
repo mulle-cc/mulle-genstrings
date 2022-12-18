@@ -1,0 +1,2 @@
+mulle-testallocator;${MULLE_TESTALLOCATOR_NODETYPE:-tar};no-import,no-singlephase;0F3AEBA9-4CBD-49E1-8EA5-DA85E1A7D2CD;${MULLE_TESTALLOCATOR_URL:-https://github.com/mulle-core/mulle-testallocator/archive/${MULLE_TAG}.tar.gz};;${MULLE_TESTALLOCATOR_TAG:-latest};;
+mulle-genstrings;${MULLE_GENSTRINGS_NODETYPE:-tar};;32350E92-6E98-44C5-94E8-E30EC6947EDC;${MULLE_GENSTRINGS_URL:-https://github.com/nat/mulle-genstrings/archive/${MULLE_TAG}.tar.gz};;${MULLE_GENSTRINGS_TAG:-latest};;

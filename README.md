@@ -2,6 +2,9 @@
 
 #### 🗻 Create Localizable.strings from NSLocalizedString
 
+> An old project, that may or may not work, but which will be resurrected
+> eventually.
+
 This is like a version of Apple's <b><tt>genstrings</tt></b> first dumbed down 
 and then put on steroids. With it's added muscle it is able to merge changes 
 with the <tt>Localizable.strings</tt> file. 

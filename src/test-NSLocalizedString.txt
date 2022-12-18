@@ -1,0 +1,17 @@
+NSLocalizedString( @"a", @"a");
+NSLocalizedString
+(@"b", @"b");
+NSLocalizedString
+(@"c", 
+@"c");
+NSLocalizedString( @"d" @"c", @"d");
+NSLocalizedString( @"/*", @"*/");
+NSLocalizedString( @"//", @"*/");
+NSLocalizedStringWithDefaultValue( @"x1", MyTable( 1, 2), bundle, @"x2", @"x3");
+
+
+
+
+
+
+

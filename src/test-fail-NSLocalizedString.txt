@@ -1,0 +1,5 @@
+NSLocalizedString();
+NSLocalizedString( @"fail2");
+NSLocalizedString NSLocalizedString( @"ok", @"ok");
+
+NSLocalizedString(( @"fail3", @"fail3");  // genstrings crashes

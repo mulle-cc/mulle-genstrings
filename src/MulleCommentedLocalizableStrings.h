@@ -22,18 +22,33 @@
 #import <Foundation/Foundation.h>
 
 
+enum MergeMode
+{
+   MergeReplace = 0,
+   MergeAdd     = 1,   // don't overwrite old, add new ones
+   MergeUpdate  = 2    // only update existing keys
+};
+
+
 @interface MulleCommentedLocalizableStrings : NSObject
 
-@property( retain, nonatomic) NSMutableDictionary  *keyValues;
-@property( retain, nonatomic) NSMutableDictionary  *keyComments;
-@property( copy, nonatomic)   NSString             *lastComment;
-@property( copy, nonatomic)   NSString             *translatorScript;
-@property( assign, nonatomic) BOOL                 verbose;
+@property( retain, nonatomic) NSMutableDictionary   *keyValues;
+@property( retain, nonatomic) NSMutableDictionary   *keyComments;
+@property( copy, nonatomic)   NSString              *lastComment;
+@property( copy, nonatomic)   NSString              *translatorScript;
+@property( assign, nonatomic) NSPropertyListFormat  plistFormat; // -1 : strings
+@property( assign, nonatomic) BOOL                  verbose;
 
 - (id) initWithContentsOfFile:(NSString *) file;
+- (id) initWithParametersArray:(NSArray *) collection;
+
+- (NSUInteger) count;
 - (NSString *) localizableStringsDescription;
 
 - (BOOL) mergeParametersArray:(NSArray *) collection
-                      addOnly:(BOOL) addOnly;
+                         mode:(enum MergeMode) mode;
+
+- (BOOL) mergeCommentedLocalizableStrings:(MulleCommentedLocalizableStrings *) other
+                                     mode:(enum MergeMode) mode;
 
 @end

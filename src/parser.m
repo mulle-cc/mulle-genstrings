@@ -20,6 +20,17 @@
 //
 #import "parser.h"
 
+#include <ctype.h>
+
+
+// "cheap"
+#ifndef __MULLE_OBJC__
+# define objc_va_list     va_list
+# define objc_va_start    va_start
+# define objc_va_end      va_end
+# define objcVarargList   arguments
+#endif
+
 
 void   parser_init( parser *p, unichar *buf, size_t len)
 {
@@ -46,21 +57,22 @@ void   parser_set_error_callback( parser *p, id self, SEL sel)
 //
 void  MULLE_NO_RETURN  parser_error( parser *p, char *c_format, ...)
 {
-   NSString   *reason;
-   NSString   *s;
-   size_t     p_len;
-   size_t     s_len;
-   size_t     i;
-   va_list    args;
-   unichar    *prefix;
-   unichar    *suffix;
-   
+   NSString              *reason;
+   NSString              *s;
+   size_t                p_len;
+   size_t                s_len;
+   size_t                i;
+   objc_va_list          args;
+   unichar               *prefix;
+   unichar               *suffix;
+   struct parser_error   error;
+
    if( p->parser_do_error)
    {
-      va_start( args, c_format);
+      objc_va_start( args, c_format);
       reason = [[[NSString alloc] initWithFormat:[NSString stringWithCString:c_format]
-                                       arguments:args] autorelease];
-      va_end( args);
+                                  objcVarargList:args] autorelease];
+      objc_va_end( args);
 
       //
       // p->memo_scion.curr is about the start of the parsed object
@@ -85,7 +97,7 @@ void  MULLE_NO_RETURN  parser_error( parser *p, char *c_format, ...)
 
       if( &suffix[ s_len] > p->sentinel)
          s_len  = p->sentinel - p->curr;
-      
+
       // stop tail at linefeed
       for( i = 0; i < s_len; i++)
          if( suffix[ i] == '\r' || suffix[ i] == '\n' || suffix[ i] == ';' || suffix[ i] == '}' || suffix[ i] == '%')
@@ -100,7 +112,7 @@ void  MULLE_NO_RETURN  parser_error( parser *p, char *c_format, ...)
 #define RED   ""
 #define NONE  ""
 #endif
-      
+
       s = [NSString stringWithFormat:@"%.*S" RED "%c" NONE "%.*S", (int) p_len, prefix, *p->curr, (int) s_len, suffix];
       s = [s stringByReplacingOccurrencesOfString:@"\n"
                                        withString:@" "];
@@ -112,17 +124,22 @@ void  MULLE_NO_RETURN  parser_error( parser *p, char *c_format, ...)
                                        withString:@"\\\""];
       s = [s stringByReplacingOccurrencesOfString:@"'"
                                        withString:@"\\'"];
-      
+
       s = [NSString stringWithFormat:@"at '%C' near \"%@\", %@", *p->curr, s, reason];
-   
-      (*p->parser_do_error)( p->self, p->sel, p->fileName, p->memo.lineNumber, s);
+
+      error.parser     = p;
+      error.fileName   = p->fileName;
+      error.lineNumber = p->memo.lineNumber;
+      error.message    = p->fileName;
+
+      (*p->parser_do_error)( p->self, p->sel, &error);
    }
    abort();
 }
 
-   
+
 # pragma mark -
-# pragma mark Tokenizing 
+# pragma mark Tokenizing
 
 static inline void   parser_nl( parser *p)
 {
@@ -136,7 +153,7 @@ static inline void   parser_nl( parser *p)
 void   parser_skip_whitespace( parser *p)
 {
    unichar   c;
-   
+
    for( ; p->curr < p->sentinel; p->curr++)
    {
       c = *p->curr;
@@ -145,7 +162,7 @@ void   parser_skip_whitespace( parser *p)
       case '\n' :
          parser_nl( p);
          break;
-         
+
       default :
          if( c > ' ')
             return;
@@ -158,9 +175,9 @@ int   parser_skip_text_until_comment_end( parser *p)
 {
    unichar   c;
    int       matched;
-   
+
    matched = 0;
-   
+
    for( ; p->curr < p->sentinel;)
    {
       c = *p->curr++;
@@ -174,11 +191,11 @@ int   parser_skip_text_until_comment_end( parser *p)
       {
          if( c == '/')
             return( 1);
-         
+
          matched = 0;
          continue;
       }
-      
+
       if( c == '*')
          matched = 1;
    }
@@ -189,7 +206,7 @@ int   parser_skip_text_until_comment_end( parser *p)
 void   parser_skip_after_newline( parser *p)
 {
    unichar   c;
-   
+
    for( ; p->curr < p->sentinel;)
    {
       c = *p->curr++;
@@ -205,7 +222,7 @@ void   parser_skip_after_newline( parser *p)
 void   parser_skip_whitespace_and_comments( parser *p)
 {
    unichar   c;
-   
+
    for( ; p->curr < p->sentinel; p->curr++)
    {
       c = *p->curr;
@@ -214,7 +231,7 @@ void   parser_skip_whitespace_and_comments( parser *p)
       case '\n' :
          parser_nl( p);
          break;
-         
+
       case '/'  :
          switch( parser_peek_character( p))
          {
@@ -222,14 +239,14 @@ void   parser_skip_whitespace_and_comments( parser *p)
             parser_skip_after_newline( p);
             --p->curr; // because we add it again in for
             continue;
-            
+
          case '*' :
             ++p->curr;
             parser_skip_text_until_comment_end( p);
             --p->curr; // because we add it again in for
             continue;
          }
-         
+
       default :
          if( c > ' ')
             return;
@@ -244,30 +261,48 @@ void   parser_skip_whitespace_and_comments( parser *p)
 void   parser_grab_text_until_identifier_end( parser *p)
 {
    unichar   c;
-   
+
    parser_memorize( p, &p->memo);
-   
+
    for( ; p->curr < p->sentinel; p->curr++)
    {
       c = *p->curr;
-      
+
       if( c >= '0' && c <= '9')
       {
          if( p->memo.curr == p->curr)
             break;
          continue;
       }
-      
+
       if( c >= 'A' && c <= 'Z')
          continue;
-      
+
       if( c >= 'a' && c <= 'z')
          continue;
-      
+
       if( c == '_')
          continue;
-      
+
       break;
+   }
+}
+
+
+void   parser_grab_text_until_nonidentifier( parser *p)
+{
+   unichar   c;
+
+   parser_memorize( p, &p->memo);
+
+   for( ; p->curr < p->sentinel;)
+   {
+      c = *p->curr++;
+      if( ispunct( c) || isspace( c))
+      {
+         p->curr--;
+         break;
+      }
    }
 }
 
@@ -276,17 +311,17 @@ int   parser_grab_text_until_quote( parser *p)
 {
    unichar   c;
    int       escaped;
-   
+
    parser_memorize( p, &p->memo);
-   
+
    escaped = 0;
-   
+
    for( ; p->curr < p->sentinel;)
    {
       c = *p->curr++;
       if( c == '\n')
          parser_nl( p);
-      
+
       if( escaped)
       {
          escaped = 0;
@@ -311,21 +346,21 @@ NSString   * NS_RETURNS_RETAINED parser_get_retained_string( parser *p)
 {
    NSUInteger   length;
    NSString     *s;
-   
+
    length = p->curr - p->memo.curr ;
    if( ! length)
       return( nil);
-   
+
    s = [[NSString alloc] initWithCharacters:p->memo.curr
                                      length:length];
    return( s);
 }
 
 
-static unichar   parser_next_character( parser *p)
+unichar   parser_next_character( parser *p)
 {
    unichar   c;
-   
+
    if( p->curr >= p->sentinel)
       return( 0);
    c = *p->curr++;
@@ -352,7 +387,7 @@ void   parser_do_token_character( parser *p, unichar expect)
 NSString  *parser_do_identifier( parser *p)
 {
    NSString   *s;
-   
+
    parser_grab_text_until_identifier_end( p);
    s = parser_get_string( p);
    if( ! s)
@@ -370,9 +405,9 @@ id   parser_do_parameter( parser *p)
    NSString   *s;
    NSString   *tmp;
    int        ignore;
-   
+
    ignore = NO;
-   
+
    s = nil;
    for(;;)
    {
@@ -382,30 +417,30 @@ id   parser_do_parameter( parser *p)
          return( nil);
       if( c == ',' || c == ')')
          return( s ? s : [NSNull null]);
-      
+
       if( ignore)
       {
          parser_next_character( p);
          continue;
       }
-      
+
       if( c == '@')
       {
          parser_skip_peeked_character( p, c);
          parser_skip_whitespace_and_comments( p);
          c = parser_peek_character( p);
       }
-   
+
       if( c == '"')
       {
-         tmp = parser_do_string( p);
+         tmp = parser_do_quoted_string( p);
          if( s)
             tmp = [s stringByAppendingString:tmp];
          s = tmp;
          continue;
       }
-      
-      if( ! c || c == ',' || c == ')')
+
+      if( ! c)
          return( nil);
 
       ignore = YES;
@@ -419,9 +454,9 @@ NSMutableArray  *parser_do_array( parser *p)
    NSMutableArray   *array;
    id               obj;
    unichar          c;
-   
+
    parser_do_token_character( p, '(');
-   
+
    array = [NSMutableArray array];
    while( obj = parser_do_parameter( p))
    {
@@ -432,20 +467,20 @@ NSMutableArray  *parser_do_array( parser *p)
 
       parser_next_character( p);
    }
-   
+
    parser_do_token_character( p, ')');
-   
+
    return( array);
 }
 
 
 
-NSString  *parser_do_string( parser *p)
+NSString  *parser_do_quoted_string( parser *p)
 {
    NSString   *s;
-   
+
    NSCParameterAssert( parser_peek_character( p) == '"');
-   
+
    parser_skip_peeked_character( p, '\"');   // skip '"'
    if( ! parser_grab_text_until_quote( p))
       parser_error( p, "a closing double quote '\"' was expected");
@@ -453,9 +488,23 @@ NSString  *parser_do_string( parser *p)
    s = parser_get_string( p);
    parser_skip_peeked_character( p, '\"');   // skip '"'
    parser_skip_whitespace( p);
-   
+
    return( s ? s : @"");
 }
+
+
+NSString  *parser_do_string( parser *p)
+{
+   NSString   *s;
+
+   parser_grab_text_until_nonidentifier( p);
+
+   s = parser_get_string( p);
+   parser_skip_whitespace( p);
+
+   return( s ? s : @"");
+}
+
 
 
 int   parser_grab_text_until_comment_end( parser *p)

@@ -1,5 +1,7 @@
 # mulle-genstrings
 
+#### 🗻 Create Localizable.strings from NSLocalizedString
+
 This is like a version of Apple's <b><tt>genstrings</tt></b> first dumbed down 
 and then put on steroids. With it's added muscle it is able to merge changes 
 with the <tt>Localizable.strings</tt> file. 
@@ -24,6 +26,10 @@ You want to run `mulle-genstrings -o en.lproj *.m`  to generate the english
 <tt>Localizable.strings</tt> and `mulle-genstrings -a -m de.lproj -o de.lproj *.m` 
 for other language projects. This will ensure, that old translations will not be 
 overwritten and new keys are added.
+You can additionally also specify `.strings` files as input sources. These will not
+be scanned for `NSLocalizedString` but parsed as `.strings` files. This makes it
+easy to merge files.
+
 
 ### -a option: append only
 

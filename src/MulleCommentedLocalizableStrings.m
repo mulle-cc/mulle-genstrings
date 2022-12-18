@@ -35,6 +35,7 @@
    [_keyValues release];
    [_keyComments release];
    [_lastComment release];
+   [_translatorScript release];
 
    [super dealloc];
 }
@@ -53,7 +54,7 @@
    else
    {
       parser_do_token_character( p, '*');
-   
+
       if( ! parser_grab_text_until_comment_end( p))
          parser_error( p, "unexpected end of file in comment");
    }
@@ -70,16 +71,20 @@
    NSString   *value;
    NSString   *comment;
    NSCharacterSet  *whitespace;
-   
-   key = parser_do_string( p);
-   
+
+   if( parser_peek_character( p) == '"')
+      key = parser_do_quoted_string( p);
+   else
+      key = parser_do_string( p);
+
    parser_do_token_character( p, '=');
 
    parser_skip_whitespace( p);
-   if( parser_peek_character( p) != '"')
-      parser_error( p, "'\"' expected");
-   
-   value = parser_do_string( p);
+
+   if( parser_peek_character( p) == '"')
+      value = parser_do_quoted_string( p);
+   else
+      value = parser_do_string( p);
 
    parser_do_token_character( p, ';');
 
@@ -88,26 +93,26 @@
 
    [_keyValues setObject:value
                   forKey:key];
-   
+
    if( ! _lastComment)
       return;
-   
+
    whitespace = [NSCharacterSet whitespaceCharacterSet];
    comment    = [_lastComment stringByTrimmingCharactersInSet:whitespace];
-   
+
    if( ! getenv("mulle-genstrings-dont-split-comment-lines"))
    {
       NSArray         *components;
       NSEnumerator    *rover;
       NSString        *s;
       NSMutableArray  *array;
-      
+
       components = [_lastComment componentsSeparatedByString:@"\n"];
       if( [components count] != 1)
       {
          rover = [components objectEnumerator];
          array = [NSMutableArray array];
-         
+
          while( s = [rover nextObject])
          {
             s = [s stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -117,7 +122,7 @@
          comment = [array componentsJoinedByString:@"\n"];
       }
    }
-   
+
    [_keyComments setObject:comment
                     forKey:key];
    [_lastComment autorelease];
@@ -125,34 +130,47 @@
 }
 
 
-
 - (void) parse:(parser *) p
 {
    unichar   c;
-   
+   NSData    *data;
+   NSError   *error;
+   id        plist;
+
    c = parser_peek_character( p);
    if( c == 0xFEFF)
       parser_skip_peeked_character( p, c);
- 
+
+   c = parser_peek_character( p);
+   if( c == '{') // it's really a propertylist
+   {
+      plist = [NSDictionary dictionaryWithContentsOfFile:p->fileName];
+      if( ! plist)
+         parser_error( p, "Text looks like a plist, but can't be parsed.");
+      _plistFormat = NSPropertyListOpenStepFormat;
+      [_keyValues addEntriesFromDictionary:plist];
+      return;
+   }
+
    for(;;)
    {
       parser_memorize( p, &p->memo_interesting);
       parser_skip_whitespace( p);
-      
+
       c = parser_peek_character( p);
       switch( c)
       {
          case '/' : // comment
             [self parseComment:p];
             break;
-            
+
          case '"' : // string = string
             [self parseKeyValue:p];
             break;
-            
+
          case 0   :
             return;
-            
+
          default  :
             parser_error( p, "unexpected character, expected comment or string");
       }
@@ -160,11 +178,12 @@
 }
 
 
-- (void) parserErrorInFileName:(NSString *) fileName
-                    lineNumber:(NSUInteger) lineNumber
-                        reason:(NSString *) reason
+- (void) parserDidFail:(struct parser_error *) error
 {
-   fprintf( stderr, "error in %s line %d: %s\n", [fileName fileSystemRepresentation], (int) lineNumber, [reason UTF8String]);
+   fprintf( stderr, "error in %s line %d: %s\n",
+         [error->fileName fileSystemRepresentation],
+         (int) error->lineNumber,
+         [error->message UTF8String]);
    exit( 1);
 }
 
@@ -174,10 +193,20 @@
    self = [super init];
    if( ! self)
       return( self);
-   
+
    _keyValues   = [NSMutableDictionary new];
    _keyComments = [NSMutableDictionary new];
    _verbose     = getenv( "VERBOSE") != NULL;
+   _plistFormat = -1;
+   return( self);
+}
+
+
+- (id) initWithParametersArray:(NSArray *) collection
+{
+   self = [self init];
+   [self mergeParametersArray:collection
+                         mode:MergeReplace];
    return( self);
 }
 
@@ -187,26 +216,25 @@
    parser    p;
    NSData    *data;
    NSString  *s;
-   
+
    self = [self init];
    if( ! self)
       return( self);
-   
+
    s = [NSString stringWithValiantlyDeterminedContentsOfFile:file];
    if( ! s)
    {
       [self autorelease];
       return( nil);
    }
-   
-   data = [s dataUsingEncoding:NSUTF16StringEncoding];
+
+   data = [s dataUsingEncoding:NSUnicodeStringEncoding];
    parser_init( &p, (void *) [data bytes], [data length] / sizeof( unichar));
    parser_set_filename( &p, file);
-   parser_set_error_callback( &p, self, @selector( parserErrorInFileName:lineNumber:reason:));
-   
+   parser_set_error_callback( &p, self, @selector( parserDidFail:));
+
    [self parse:&p];
-   
-   // now parse stuff into our
+
    return( self);
 }
 
@@ -214,24 +242,31 @@
 - (BOOL) mergeKey:(NSString *) key
             value:(NSString *) value
           comment:(NSString *) comment
-          addOnly:(BOOL) addOnly
+             mode:(enum MergeMode) mode
 {
-   NSString       *oldValue;
-   NSArray        *comments;
-   BOOL           chchchchchanges;
-   
+   NSString   *oldValue;
+   NSArray    *comments;
+   BOOL       chchchchchanges;
+
+   oldValue = [_keyValues objectForKey:key];
+   if( mode & MergeUpdate)
+   {
+      if( ! oldValue)
+         return( NO);
+   }
+
    chchchchchanges = NO;
-   
+
    if ( [comment rangeOfString:@"*/"].length)
       comment = [[comment componentsSeparatedByString:@"*/"] componentsJoinedByString:@"* /"];
-   
-   oldValue = [_keyValues objectForKey:key];
+
+
    if ( [oldValue rangeOfString:@"*/"].length)
       oldValue = [[oldValue componentsSeparatedByString:@"*/"] componentsJoinedByString:@"* /"];
-   
+
    if( ! [oldValue isEqualToString:value])
    {
-      if( ! addOnly || ! oldValue)
+      if( ! (mode & MergeAdd) || ! oldValue)
       {
          if( _verbose)
          {
@@ -240,13 +275,13 @@
             else
                NSLog( @"--> add \"%@\"", key);
          }
-         
+
          [_keyValues setObject:value
                         forKey:key];
          chchchchchanges = YES;
       }
    }
-   
+
    comment  = [comment stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
    comments = [_keyComments mulleObjectsForKey:key];
    if( ! comments)
@@ -255,17 +290,17 @@
       {
          if( _verbose)
             NSLog( @"--> add comment to \"%@\"", key);
-            
+
          [_keyComments mulleAddObject:comment
                                forKey:key];
          return( YES);
       }
       return( chchchchchanges);
    }
-   
+
    if( [comments containsObject:comment])
       return( chchchchchanges);
-   
+
    if( _verbose)
       NSLog( @"--> add comment to \"%@\"", key);
 
@@ -277,40 +312,66 @@
 
 
 - (BOOL) mergeParameters:(NSArray *) parameters
-                  addOnly:(BOOL) addOnly
+                    mode:(enum MergeMode) mode
 {
-   NSString       *key;
-   NSString       *value;
-   NSString       *comment;
-   
+   NSString   *key;
+   NSString   *value;
+   NSString   *comment;
+
    key     = [parameters objectAtIndex:0];
    value   = [parameters objectAtIndex:1];
    comment = [parameters objectAtIndex:2];
-   
+
    return( [self mergeKey:key
                     value:value
                   comment:comment
-                  addOnly:addOnly]);
+                     mode:mode]);
 }
 
 
 - (BOOL) mergeParametersArray:(NSArray *) collection
-                      addOnly:(BOOL) addOnly
+                         mode:(enum MergeMode) mode
 {
    NSEnumerator   *rover;
    NSArray        *parameters;
    BOOL           chchchchchanges;
-   
+
    chchchchchanges = NO;
-   
+
    rover = [collection objectEnumerator];
    while( parameters = [rover nextObject])
    {
       @autoreleasepool
       {
          chchchchchanges |= [self mergeParameters:parameters
-                                          addOnly:addOnly];
+                                             mode:mode];
       }
+   }
+   return( chchchchchanges);
+}
+
+
+- (BOOL) mergeCommentedLocalizableStrings:(MulleCommentedLocalizableStrings *) other
+                                     mode:(enum MergeMode) mode
+{
+   NSEnumerator   *rover;
+   NSString       *key;
+   NSString       *value;
+   NSString       *comment;
+   BOOL           chchchchchanges;
+
+   chchchchchanges = NO;
+
+   rover = [other->_keyValues keyEnumerator];
+   while( key = [rover nextObject])
+   {
+      value   = [other->_keyValues objectForKey:key];
+      comment = [other->_keyComments objectForKey:key];
+
+      chchchchchanges |= [self mergeKey:key
+                                  value:value
+                                comment:comment
+                                   mode:mode];
    }
    return( chchchchchanges);
 }
@@ -323,10 +384,10 @@
 
    if( ! _translatorScript)
       return( value);
-   
+
    s = [_translatorScript stringByReplacingOccurrencesOfString:@"{}"
                                                     withString:value];
-   
+
    t = [NSTask systemWithString:s
                workingDirectory:nil];
    if( ! t)
@@ -339,6 +400,12 @@
 }
 
 
+- (NSUInteger) count
+{
+   return( [_keyValues count]);
+}
+
+
 - (NSString *) localizableStringsDescription
 {
    NSArray           *keys;
@@ -348,12 +415,15 @@
    NSString          *key;
    NSString          *value;
    NSString          *comment;
-   
+
+   if( _plistFormat == NSPropertyListOpenStepFormat)
+      return( [_keyValues description]);
+
    buf = [NSMutableString string];
-   
+
    keys  = [_keyValues allKeys];
    keys  = [keys sortedArrayUsingSelector:@selector( mulleCaseInsensitiveCompare:)];
-   
+
    rover = [keys objectEnumerator];
    while( key = [rover nextObject])
    {
@@ -361,19 +431,19 @@
       if( comments)
       {
          comment = [comments componentsJoinedByString:@"\n   "];
-         
+
          [buf appendString:@"/* "];
-         
+
          // pedantic
          NSParameterAssert( ! [comment rangeOfString:@"*/"].length);
-         
+
          [buf appendString:comment];
          [buf appendString:@" */\n"];
       }
-      
+
       [buf appendString:[key mulleQuotedString]];
       [buf appendString:@" = "];
-      
+
       value = [_keyValues objectForKey:key];
       value = [self translatedValue:value];
       [buf appendString:[value mulleQuotedString]];

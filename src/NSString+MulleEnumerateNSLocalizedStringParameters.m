@@ -26,7 +26,7 @@
 
 @interface NSData ( MulleNSLocalizedStringEnumerator)
 
-- (NSArray *) mulleUTF16NSLocalizedStringParametersWithCharacterRange:(NSRange) range
+- (NSArray *) mulleLocalizedStringParametersWithCharacterRange:(NSRange) range
                                                                  type:(NSLocalizedStringCallType) type
                                            numberOfConsumedCharacters:(NSUInteger *) consumed;
 
@@ -44,16 +44,16 @@
 {
    NSUInteger       n;
    NSMutableArray   *array;
-   
+
    parser_memorize( p, &p->memo_interesting);
 
    parser_do_identifier( p);
    parser_skip_whitespace_and_comments( p);
- 
+
    array = parser_do_array( p);
    if( ! array)
       return( nil);
-   
+
    n = [array count];
    switch( type)
    {
@@ -96,30 +96,28 @@
 }
 
 
-- (void) parserErrorInFileName:(NSString *) fileName
-                    lineNumber:(NSUInteger) lineNumber
-                        reason:(NSString *) reason
+- (void) parserDidFail:(struct parser_error *) error
 {
    [NSException raise:NSInvalidArgumentException
-               format:@"%@", reason];
+               format:@"%@", error->message];
 }
 
 
-- (NSArray *) mulleUTF16NSLocalizedStringParametersWithCharacterRange:(NSRange) range
+- (NSArray *) mulleLocalizedStringParametersWithCharacterRange:(NSRange) range
                                                                  type:(NSLocalizedStringCallType) type
                                            numberOfConsumedCharacters:(NSUInteger *) consumed
 {
    parser    p;
    NSArray   *values;
    unichar   *buf;
-   
+
    buf    = (unichar *) [self bytes];
    values = nil;
-   
+
 NS_DURING
    parser_init( &p, &buf[ range.location], range.length);
-   parser_set_error_callback( &p, self, @selector( parserErrorInFileName:lineNumber:reason:));
-   
+   parser_set_error_callback( &p, self, @selector( parserDidFail:));
+
    values    = [self mulleParseNSLocalizedStringParameters:&p
                                                       type:type];
    *consumed = p.curr - p.buf;
@@ -130,7 +128,7 @@ NS_HANDLER
    NSLog( @"%@", localException);
 #endif
 NS_ENDHANDLER
-   
+
    // now parse stuff into our
    return( values);
 }
@@ -145,7 +143,7 @@ NS_ENDHANDLER
    NSData       *_data;
    NSData       *_searchData;
    NSUInteger   _searchLen;
-   
+
    NSLocalizedStringCallType   _type;
 }
 @end
@@ -157,7 +155,7 @@ NS_ENDHANDLER
 {
    [_data release];
    [_searchData release];
-   
+
    [super dealloc];
 }
 
@@ -167,18 +165,19 @@ NS_ENDHANDLER
                  type:(NSLocalizedStringCallType) type
 {
    NSData   *data;
+
    if( self = [super init])
    {
       _type   = type;
-      
-      _data   = [[s dataUsingEncoding:NSUTF16StringEncoding] retain];
+
+      _data   = [[s dataUsingEncoding:NSUnicodeStringEncoding] retain];
       _length = [_data length] / sizeof( unichar);
       _range  = NSMakeRange( 0, _length);
-      
+
       // snip off BOM from search key
-      data = [key dataUsingEncoding:NSUTF16StringEncoding];
+      data = [key dataUsingEncoding:NSUnicodeStringEncoding];
       data = [data subdataWithRange:NSMakeRange( sizeof( unichar), [data length] - sizeof( unichar))];
-      
+
       _searchLen  = [data length] / sizeof( unichar);
       _searchData = [data retain];
    }
@@ -192,51 +191,51 @@ NS_ENDHANDLER
    NSRange      consumeRange;
    NSArray      *parameters;
    NSUInteger   consumed;
-   
+
 retry:
    if( ! _range.length)
       return( nil);
-   
+
    // search in data, but treat range as "unichar" unit
    {
       range = [_data rangeOfData:_searchData
                          options:0
                            range:NSMakeRange( _range.location * sizeof( unichar), _range.length * sizeof( unichar))];
-      
+
       if( ! range.length)
       {
          _range.length = 0;
          return( nil);
       }
-      
+
       NSParameterAssert( ! (range.location & (sizeof( unichar) - 1)));
       NSParameterAssert( ! (range.length & (sizeof( unichar) - 1)));
-      
+
       range.location /= sizeof( unichar);
       range.length   /= sizeof( unichar);
    }
-   
+
    consumeRange.location = range.location;
    consumeRange.length   = _length - consumeRange.location;
-   
-   parameters = [_data mulleUTF16NSLocalizedStringParametersWithCharacterRange:consumeRange
-                                                                          type:_type
-                                                    numberOfConsumedCharacters:&consumed];
-   
+
+   parameters = [_data mulleLocalizedStringParametersWithCharacterRange:consumeRange
+                                                                   type:_type
+                                             numberOfConsumedCharacters:&consumed];
+
    if( ! parameters)
    {
       NSParameterAssert( _range.length >= _searchLen);
-   
+
       _range.location += _searchLen;  //
       _range.length   -= _searchLen ;
       goto retry;
    }
-   
+
   NSParameterAssert( _range.length >= consumed);
 
    _range.location = range.location + consumed;
    _range.length   = _length - _range.location ;
-   
+
    return( parameters);
 }
 

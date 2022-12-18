@@ -25,51 +25,62 @@
 #import "NSString+MulleEnumerateNSLocalizedStringParameters.h"
 #import "NSString+MulleValiantFile.h"
 
-#define VERSION   "v18.48.6"
+#include <stdlib.h>
 
+
+#define VERSION   "0.1848.7"
+
+BOOL   verbose;
 
 static void   usage()
 {
-   fprintf( stderr, "mulle-genstrings [options] <sources>\n"
+   fprintf( stderr, "mulle-genstrings [options] <sourcefiles|stringsfiles>\n"
            "\n"
-           "options\n"
+           "\tExtracts NSLocalizedStrings from sourcefiles. Parses strings\n"
+           "\tfiles and keeps comments intact.\n"
+           "\tCan merge the strings in various modes.\n"
+           "\tThe default is to replace existing keys and add new keys.\n"
+           "\n"
+           "\tThe result will be printed, unless a -m or -o option is given\n"
+           "\t"
+           "\n"
+           "Options:\n"
            "\t-a        : don't overwrite key, if it already exists\n"
            "\t-f        : force reading and writing of Localizable.strings file\n"
            "\t-m input  : the directory to contain the source Localizable.strings (or the filename)\n"
            "\t-o output : the directory to contain the Localizable.strings (or the filename)\n"
-           "\t-v        : print version\n"
+           "\t-v        : increase verbosity\n"
            "\t-s key    : replace key to search (default is NSLocalizedString)\n"
            "\t-t script : translation script to use for value (given as {}).\n"
-           "\n"
-           "sources\n"
-           "\t          : any kind of text files, probably .m files\n");
+           "\t-u        : don't add keys\n"
+           "\n");
    _exit( 1);
 }
 
 
-static struct
-{
-   NSStringEncoding  code;
-   char              *name;
-} encodings[] =
-{
-   { NSUTF8StringEncoding,              "NSUTF8StringEncoding" },
-   { NSNonLossyASCIIStringEncoding,     "NSNonLossyASCIIStringEncoding" },
-   { NSUTF32StringEncoding,             "NSUTF32StringEncoding" },
-   { NSUTF16LittleEndianStringEncoding, "NSUTF16LittleEndianStringEncoding" },
-   { NSUTF16BigEndianStringEncoding,    "NSUTF16BigEndianStringEncoding" },
-   { NSMacOSRomanStringEncoding,        "NSMacOSRomanStringEncoding" },
-   { NSISOLatin1StringEncoding,         "NSISOLatin1StringEncoding" },
-   { NSNEXTSTEPStringEncoding,          "NSNEXTSTEPStringEncoding" },
-   { 0, 0 }
-};
+// static struct
+// {
+//    NSStringEncoding  code;
+//    char              *name;
+// } encodings[] =
+// {
+//    { NSUTF8StringEncoding,              "NSUTF8StringEncoding" },
+//    { NSNonLossyASCIIStringEncoding,     "NSNonLossyASCIIStringEncoding" },
+//    { NSUTF32StringEncoding,             "NSUTF32StringEncoding" },
+//    { NSUTF16LittleEndianStringEncoding, "NSUTF16LittleEndianStringEncoding" },
+//    { NSUTF16BigEndianStringEncoding,    "NSUTF16BigEndianStringEncoding" },
+//    { NSMacOSRomanStringEncoding,        "NSMacOSRomanStringEncoding" },
+//    { NSISOLatin1StringEncoding,         "NSISOLatin1StringEncoding" },
+//    { NSNEXTSTEPStringEncoding,          "NSNEXTSTEPStringEncoding" },
+//    { 0, 0 }
+// };
 
 
 
 static NSString   *valiantlyOpenFile( NSString *file)
 {
    NSString  *s;
-   
+
    s = [NSString stringWithValiantlyDeterminedContentsOfFile:file];
    if( s)
       return( s);
@@ -79,19 +90,19 @@ static NSString   *valiantlyOpenFile( NSString *file)
 
 static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
 {
-   NSString           *input;
-   NSEnumerator       *rover;
-   NSArray            *parameters;
-   NSMutableSet       *collection;
-   
+   NSArray        *parameters;
+   NSEnumerator   *rover;
+   NSMutableSet   *collection;
+   NSString       *input;
+
    collection = [NSMutableSet set];
    @autoreleasepool
    {
       input = valiantlyOpenFile( file);
-      
+
       if( ! [input rangeOfString:key].length)
          return( nil);  // nothing to do
-      
+
       /* read NSLocalizedString parameters from input */
       rover = [input mulleEnumerateNSLocalizedStringParameters:key];
       while( parameters = [rover nextObject])
@@ -102,7 +113,7 @@ static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
              [parameters objectAtIndex:1] == [NSNull null] ||
              [parameters objectAtIndex:2] == [NSNull null])
             continue;
-            
+
          [collection addObject:parameters];
       }
    }
@@ -110,18 +121,20 @@ static NSArray  *parameterCollectionFromFile( NSString *file, NSString *key)
 }
 
 
-static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings, NSString *outputFile)
+static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings,
+                                     NSString *outputFile,
+                                     BOOL isDictionary)
 {
    NSString   *output;
    NSError    *error;
-   
+
    output = [strings localizableStringsDescription];
    if( ! outputFile)
    {
       printf( "%s", [output UTF8String]);
       return( 0);
    }
-   
+
    error = nil;
    if( ! [output writeToFile:outputFile
                   atomically:YES
@@ -140,7 +153,7 @@ static int  writeLocalizableStrings( MulleCommentedLocalizableStrings *strings, 
 MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
 {
    MulleCommentedLocalizableStrings   *strings;
-   
+
    /* now merge key/value/comment collection with previous contents */
    strings = nil;
    if( file)
@@ -156,14 +169,15 @@ MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
             exit( 1);
          }
       }
-      if( getenv( "VERBOSE"))
-         NSLog( @"read contents of %@ (%ld entries)", file, (long) [[strings keyValues] count]);
+      else
+         if( verbose)
+            NSLog( @"read contents of %@ (%ld entries)", file, (long) [[strings keyValues] count]);
    }
-   
+
    if( ! strings)
    {
       strings = [[MulleCommentedLocalizableStrings new] autorelease];
-      if( getenv( "VERBOSE"))
+      if( verbose)
          NSLog( @"creating fresh strings");
    }
    return( strings);
@@ -172,8 +186,8 @@ MulleCommentedLocalizableStrings   *setup_strings( NSString *file)
 
 static NSString  *completeLocalizableStringsFile( NSString *file)
 {
-   BOOL isDirectory;
-   
+   BOOL   isDirectory;
+
    if( [[NSFileManager defaultManager] fileExistsAtPath:file
                                             isDirectory:&isDirectory] && isDirectory)
    {
@@ -183,47 +197,97 @@ static NSString  *completeLocalizableStringsFile( NSString *file)
 }
 
 
-int main( int argc, const char * argv[])
+static MulleCommentedLocalizableStrings   *readSourceFile( NSString *filename,
+                                                           NSString *NSLocalizedStringKey)
 {
    MulleCommentedLocalizableStrings   *strings;
    NSArray                            *collection;
+
+   collection = parameterCollectionFromFile( filename, NSLocalizedStringKey);
+   if( verbose)
+      NSLog( @"%@ contains %ld occurrences of %@", filename, (long) [collection count], NSLocalizedStringKey);
+   strings = [[[MulleCommentedLocalizableStrings alloc] initWithParametersArray:collection] autorelease];
+   return( strings);
+}
+
+
+static MulleCommentedLocalizableStrings  *readStringsFile( NSString **filename)
+{
+   MulleCommentedLocalizableStrings   *strings;
+
+   *filename = completeLocalizableStringsFile( *filename);
+   strings  = setup_strings( *filename);
+   return( strings);
+}
+
+
+static MulleCommentedLocalizableStrings
+   *readSourceOrStringsFile( NSString **p_filename,
+                             NSString *NSLocalizedStringKey)
+{
+   MulleCommentedLocalizableStrings   *strings;
+   NSString                           *filename;
+
+   @autoreleasepool
+   {
+      filename = *p_filename;
+      if( [[[filename pathExtension] lowercaseString] isEqualToString:@"strings"])
+         strings = readStringsFile( p_filename);
+      else
+         strings = readSourceFile( filename, NSLocalizedStringKey);
+      [strings retain];
+   }
+   [strings autorelease];
+
+   NSLog( @"\"%@\" read %ld string entries", filename, (long) [strings count]);
+   return( strings);
+}
+
+
+int main( int argc, const char * argv[])
+{
+   MulleCommentedLocalizableStrings   *strings;
+   MulleCommentedLocalizableStrings   *inputStrings;
    NSString                           *outputFile;
    NSString                           *mergeFile;
    NSString                           *inputFile;
    NSString                           *translator;
    NSString                           *NSLocalizedStringKey;
    BOOL                               chchchanges;
-   BOOL                               addOnly;
    BOOL                               force;
+   BOOL                               isDictionary;
+   enum MergeMode                     mergeMode;
    int                                i;
-   
+
    NSLocalizedStringKey = @"NSLocalizedString";
    translator           = nil;
-   
-   addOnly = NO;
-   force   = NO;
-   
+
+   force        = NO;
+   isDictionary = NO;
+   mergeMode    = MergeReplace;
+   verbose      = getenv( "VERBOSE");
+
    @autoreleasepool
    {
       if( argc < 2)
          usage();
-   
+
       outputFile  = nil;
       strings     = nil;
       chchchanges = YES;
       mergeFile   = nil;
-      
+
       for( i = 1; i < argc; i++)
       {
-         if( ! strcmp( argv[ i], "-v"))
+         if( ! strcmp( argv[ i], "--version"))
          {
             fprintf( stderr, "mulle-genstrings " VERSION "\n");
-            continue;
+            exit( 0);
          }
 
          if( ! strcmp( argv[ i], "-a"))
          {
-            addOnly = YES;
+            mergeMode |= MergeAdd;
             continue;
          }
 
@@ -238,28 +302,27 @@ int main( int argc, const char * argv[])
 
          if( ! strcmp( argv[ i], "-m"))
          {
-            if( strings || mergeFile || ++i >= argc)
+            if( outputFile || strings || mergeFile || ++i >= argc)
                usage();
-            
-            mergeFile = [NSString stringWithCString:argv[ i]];
-            mergeFile = completeLocalizableStringsFile( mergeFile);
-            
-            strings = setup_strings( mergeFile);
-            
+
+            mergeFile   = [NSString stringWithCString:argv[ i]];
+            strings     = readStringsFile( &mergeFile);
+            chchchanges = NO;     // do change tracking
             continue;
          }
-         
+
          if( ! strcmp( argv[ i], "-o"))
          {
             if( outputFile || ++i >= argc)
                usage();
-            
-            outputFile = [NSString stringWithCString:argv[ i]];
-            outputFile = completeLocalizableStringsFile( outputFile);
-            chchchanges = NO;  // do change tracking
+
+            outputFile  = [NSString stringWithCString:argv[ i]];
+            outputFile  = completeLocalizableStringsFile( outputFile);
+            if( ! mergeFile || ! [mergeFile isEqualToString:outputFile])
+               chchchanges = YES;   // do no change tracking
             continue;
          }
-      
+
          if( ! strcmp( argv[ i], "-s"))
          {
             if( i == argc-1)
@@ -268,7 +331,7 @@ int main( int argc, const char * argv[])
             NSLocalizedStringKey = [[[NSString alloc] initWithCString:argv[ ++i]] autorelease];
             continue;
          }
-         
+
          if( ! strcmp( argv[ i], "-t"))
          {
             if( i == argc-1)
@@ -278,37 +341,44 @@ int main( int argc, const char * argv[])
             continue;
          }
 
-         @autoreleasepool
+         if( ! strcmp( argv[ i], "-u"))
          {
-            inputFile = [NSString stringWithCString:argv[ i]];
-            collection = parameterCollectionFromFile( inputFile, NSLocalizedStringKey);
-            if( ! [collection count])
-               continue;
-
-            if( getenv( "VERBOSE"))
-               NSLog( @"%@ contains %ld occurrences of %@", inputFile, (long) [collection count], NSLocalizedStringKey);
-            [collection retain];
+            mergeMode |= MergeUpdate;
+            continue;
          }
-      
+
+         if( ! strcmp( argv[ i], "-f"))
+         {
+            verbose = YES;
+            continue;
+         }
+
+         inputFile    = [[[NSString alloc] initWithCString:argv[ i]] autorelease];
+         inputStrings = readSourceOrStringsFile( &inputFile, NSLocalizedStringKey);
+         if( ! [inputStrings count])
+            continue;
+
          if( ! strings)
             strings = setup_strings( nil);
-      
+
          @autoreleasepool
          {
-            chchchanges |= [strings mergeParametersArray:collection
-                                                 addOnly:addOnly];
-            [collection autorelease];
+            chchchanges |= [strings mergeCommentedLocalizableStrings:inputStrings
+                                                                mode:mergeMode];
          }
       }
-   
+
       /* changed something ? then update */
       if( chchchanges || force)
       {
          [strings setTranslatorScript:translator];
-         return( writeLocalizableStrings( strings, outputFile));
+         return( writeLocalizableStrings( strings, outputFile ? outputFile : mergeFile, isDictionary));
       }
+      else
+         if( verbose)
+            NSLog( @"No changes to write");
    }
-   
+
    return( 0);
 }
 

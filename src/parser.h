@@ -41,19 +41,29 @@ typedef struct _parser_memo
 } parser_memo;
 
 
+struct parser_error
+{
+   struct   _parser   *parser;
+   NSString           *fileName;
+   NSUInteger         lineNumber;
+   NSString           *message;
+   void               *space[ 2];  // metaABI space
+};
+
+
 typedef struct   _parser
 {
    unichar       *buf;
    unichar       *sentinel;
-   
+
    unichar       *curr;
    NSUInteger    lineNumber;
-   
+
    parser_memo   memo;
    parser_memo   memo_interesting;
-   
-   void          (*parser_do_error)( id self, SEL sel, NSString *filename, NSUInteger line, NSString *message);
-   
+
+   void          (*parser_do_error)( id self, SEL sel, struct parser_error *error);
+   NSPropertyListFormat  plistFormat;
    id            self;
    SEL           sel;
    NSString      *fileName;
@@ -69,6 +79,7 @@ void   parser_set_error_callback( parser *p, id self, SEL sel);
 int   parser_grab_text_until_comment_end( parser *p);
 void   parser_grab_text_until_identifier_end( parser *p);
 
+NSString  *parser_do_quoted_string( parser *p);
 NSString  *parser_do_string( parser *p);
 NSMutableArray  *parser_do_array( parser *p);
 void   parser_do_token_character( parser *p, unichar expect);
@@ -78,6 +89,8 @@ void   parser_skip_whitespace( parser *p);
 void   parser_skip_whitespace_and_comments( parser *p);
 
 void   parser_skip_after_newline( parser *p);
+
+unichar   parser_next_character( parser *p);
 
 /*
  *

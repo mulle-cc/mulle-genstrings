@@ -40,8 +40,8 @@
 		41106EA519EF3070000CC2B6 /* mulle-genstrings */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "mulle-genstrings"; sourceTree = BUILT_PRODUCTS_DIR; };
 		41106EA819EF3070000CC2B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		41106EAB19EF3070000CC2B6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		411AB10D1BC8098A0089AA49 /* mulle-ms-translate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "mulle-ms-translate.sh"; sourceTree = "<group>"; };
-		412E53B41BC847760082DD5E /* mulle-ms-language-code-for-apple-locale.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "mulle-ms-language-code-for-apple-locale.sh"; sourceTree = "<group>"; };
+		411AB10D1BC8098A0089AA49 /* mulle-ms-translate.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "mulle-ms-translate.sh"; path = "bin/mulle-ms-translate.sh"; sourceTree = "<group>"; };
+		412E53B41BC847760082DD5E /* mulle-ms-language-code-for-apple-locale.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "mulle-ms-language-code-for-apple-locale.sh"; path = "bin/mulle-ms-language-code-for-apple-locale.sh"; sourceTree = "<group>"; };
 		4141F06219F0782B0041FC63 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		4141F06319F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MulleCaseInsensitiveCompare.h"; sourceTree = "<group>"; };
 		4141F06419F07B680041FC63 /* NSString+MulleCaseInsensitiveCompare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MulleCaseInsensitiveCompare.m"; sourceTree = "<group>"; };
@@ -169,6 +169,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 41106E9C19EF3070000CC2B6;

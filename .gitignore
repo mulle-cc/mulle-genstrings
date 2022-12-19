@@ -33,3 +33,5 @@ test*/**/*.dSYM/
 version.old
 .gdb_history
 .ackrc
+xcuserdata/
+*.xcworkspace/

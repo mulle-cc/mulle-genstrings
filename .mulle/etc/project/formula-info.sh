@@ -2,8 +2,8 @@
 # If you don't have this file, there will be no homebrew
 # formula operations.
 #
-PROJECT="mulle-xcode-to-cmake"     # your project/repository name
-DESC="🎭 Convert Xcode projects to cmake CMakeLists.txt "
+PROJECT="mulle-genstrings"     # your project/repository name
+DESC="🗻 Create Localizable.strings from NSLocalizedString"
 LANGUAGE="objc"                       # c,cpp, objc, bash ...
 # NAME="${PROJECT}"                # formula filename without .rb extension
 

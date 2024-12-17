@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.15)
 
-project( mulle-genstrings C)
+project( mulle-genstrings C VERSION 18.48.7)
 
 
 

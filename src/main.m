@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 
-#define VERSION   "18.48.6"
+#define VERSION   "18.48.7"
 
 BOOL   verbose;
 

@@ -1,3 +1,7 @@
+### 18.48.7
+
+* fix for deficient Xcode
+
 ### 18.48.6 
 
 Some changes for hand-made Localizable.strings files:
